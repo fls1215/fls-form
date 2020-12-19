@@ -1,0 +1,20 @@
+{
+  "name": "fls-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "core-js": "^3.8.1",
+    "vue": "^2.6.12",
+    "vuex": "^3.6.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.5.9",
+    "@vue/cli-plugin-vuex": "^4.5.9",
+    "@vue/cli-service": "^4.5.9",
+    "vue-template-compiler": "^2.6.12"
+  }
+}
