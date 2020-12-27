@@ -13,8 +13,8 @@
         },
         props:{
             money:{
-                type:String,
-                default:""
+                type:Number,
+                default:null
             }
         },
         methods:{
