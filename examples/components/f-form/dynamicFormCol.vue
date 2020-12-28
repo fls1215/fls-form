@@ -1,6 +1,6 @@
 <template>
     <el-col v-if="isShow" :span="spanNum" >
-        <f-form-item v-bind="$attrs"></f-form-item>
+        <f-form-item v-bind="$attrs" v-on="$listeners"></f-form-item>
     </el-col>
 </template>
 <script>

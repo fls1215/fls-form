@@ -29,7 +29,8 @@
                 :label = "list.label"
                 :placeholder = "list.placeholder"
                 :prop="list.prop"
-                :model.sync = "formData[list.prop]"
+                v-model = "formData[list.prop]"
+                @input="handleInput($event, list.prop)"
                 ></form-col>
             </el-row>
         </el-form>
@@ -56,6 +57,11 @@
                 }
 
             }
+        },
+        methods:{
+            handleInput(val, key) {
+                this.$emit('input', { ...this.formData, [key]: val });
+            },
         }
     }
 </script>
