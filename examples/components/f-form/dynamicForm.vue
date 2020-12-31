@@ -6,7 +6,12 @@
         <!--102	input	纯数字	可见-->
         <!--103	input	数字加小数点，默认保留两位	占全行-->
         <!--104	input	数字加字母大小写-->
-        <!--105	input	密码-->
+        <!--105	input	密码
+                        // 密码位数最少minlength位，最多maxlength位
+                        // onlyNumber,true表示允许全数字
+                        //onlyLetter,true表示允许全字母
+                        //needSpecial,true表示至少一位特殊字符
+                        -->
         <!--106	input	邮件-->
         <!--107	input	身份证-->
         <!--108	input	电话-->
@@ -23,7 +28,8 @@
         <!--401	复选框	复选框-->
         <!--501	textarea	textarea-->
         <!--601	树	树-->
-        <el-form ref="list" :model="formData" label-width="80px">
+        <!--:rules="rules"-->
+        <el-form ref="list" :model="formData" label-width="140px">
             <el-row :gutter="10">
                 <!--/**-->
                 <!--*@param label  表单项名 必写-->
@@ -49,6 +55,7 @@
                 :clearable="list.clearable"
                 :maxlength="list.maxlength"
                 :minlength="list.minlength"
+                :show-password="list.showPassword"
                 v-model = "formData[list.prop]"
                 @input="handleInput($event, list.prop)"
                 ></form-col>
@@ -70,30 +77,68 @@
                 lists:[
                     {
                         id:"1",
-                        label:"活动名称",
-                        placeholder:"请输入活动名称",
+                        label:"文本框",
+                        placeholder:"请输入文本",
                         prop:"input1",
+                        spanNum:8,
                         type:"101",
+                        disabled:true
                     },
                     {
                         id:"2",
-                        label:"活动人数",
-                        placeholder:"请输入活动人数",
+                        label:"整数框",
+                        placeholder:"请输入整数",
                         prop:"input2",
+                        spanNum:8,
                         type:"102",
+                        // readonly:true
                     },
                     {
                         id:"3",
-                        label:"活动金额",
-                        placeholder:"请输入活动金额",
+                        label:"两位小数框",
+                        placeholder:"请输入两位以内小数",
                         prop:"input3",
+                        spanNum:16,
                         type:"103",
+                        clearable:true
+                    },
+                    {
+                        id:"4",
+                        label:"数字加字母大小写框",
+                        placeholder:"请输入数字或字母",
+                        prop:"input4",
+                        type:"104",
+                        maxlength:10
+                    },
+                    {
+                        id:"5",
+                        label:"密码框",
+                        placeholder:"密码框",
+                        prop:"input5",
+                        type:"105",
+                        maxlength:12,
+                        minlength:8,
+                        onlyNumber:false,
+                        onlyLetter:false,
+                        needSpecial:false,
+                        showPassword:true,
+                        rules:[
+                            { required: true, message: '请填写密码', trigger: 'blur' },
+                            { min: 8, max: 12, message: '长度在 8 到 12 个字符', trigger: 'change' },
+                        ]
                     }
                 ],
                 formData:{
                     input1:"5",
                     input2:null,
-                    input3:""
+                    input3:"",
+                    input4:"",
+                },
+                rules:{
+                    input5: [
+                        { required: true, message: '请填写密码', trigger: 'blur' },
+                        { min: 8, max: 12, message: '长度在 8 到 12 个字符', trigger: 'change' },
+                    ],
                 }
 
             }

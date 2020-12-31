@@ -1,4 +1,3 @@
-
 <template>
     <el-input
             :value="value"
@@ -13,13 +12,15 @@
         name: "input-number",
         props:{
             value: {
-                type: Number,
-                default:null
+                type: String,
+                default:""
             },
         },
         methods:{
             updateValue:function (e) {
-               e = parseInt(e);
+                // 密码只能输入字母数字特殊字符
+                e= e.replace(/[^0-9a-zA-Z!@#$%^&*.]/g,"");
+                console.log(e)
                 this.$emit('input', e);
                 return  e;
             }

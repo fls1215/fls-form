@@ -1,5 +1,5 @@
 <template>
-    <el-col v-if="isShow" :span="spanNum" >
+    <el-col v-if="!hidden" :span="spanNum" >
         <f-form-item v-bind="$attrs" v-on="$listeners"></f-form-item>
     </el-col>
 </template>
@@ -11,9 +11,9 @@ export default{
             type:Number,
             default:12
         },
-        isShow:{
+        hidden:{
             type:Boolean,
-            default:true
+            default:false
         }
     },
     components:{

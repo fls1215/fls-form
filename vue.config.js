@@ -52,7 +52,7 @@ module.exports = {
     open: true,
     /* 设置为0.0.0.0则所有的地址均能访问 */
     host: 'localhost',
-    port: 8080,
+    port: 9999,
     https: false,
     hotOnly: false
 

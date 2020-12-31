@@ -1,8 +1,8 @@
-
 <template>
     <el-input
             :value="value"
             @input="updateValue"
+            v-bind="$attrs"
     >
     </el-input>
 </template>
