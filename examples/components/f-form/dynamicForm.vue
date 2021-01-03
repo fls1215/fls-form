@@ -43,22 +43,28 @@
                 <!--*@param minlength  最少可输入0-->
                 <!--*/-->
                 <form-col
-                v-for="list in lists"
-                :key="list.id"
-                :label = "list.label"
-                :prop="list.prop"
-                :type="list.type"
-                :placeholder = "list.placeholder"
-                :disabled = "list.disabled"
-                :hidden = "list.hidden"
-                :readonly="list.readonly"
-                :clearable="list.clearable"
-                :maxlength="list.maxlength"
-                :minlength="list.minlength"
-                :show-password="list.showPassword"
-                v-model = "formData[list.prop]"
-                @input="handleInput($event, list.prop)"
+                    v-for="list in lists"
+                    :key="list.id"
+                    :label = "list.label"
+                    :prop="list.prop"
+                    :type="list.type"
+                    :placeholder = "list.placeholder"
+                    :disabled = "list.disabled"
+                    :hidden = "list.hidden"
+                    :readonly="list.readonly"
+                    :clearable="list.clearable"
+                    :maxlength="list.maxlength"
+                    :minlength="list.minlength"
+                    :onlyNumber="list.onlyNumber"
+                    :onlyLetter="list.onlyLetter"
+                    :specialType="list.specialType"
+                    :otherChar="list.otherChar"
+                    :show-password="list.showPassword"
+                    :required="list.required"
+                    v-model = "formData[list.prop]"
+                    @input="handleInput($event, list.prop)"
                 ></form-col>
+                
             </el-row>
         </el-form>
 
@@ -82,7 +88,8 @@
                         prop:"input1",
                         spanNum:8,
                         type:"101",
-                        disabled:true
+                        otherChar:false,
+                        // disabled:true
                     },
                     {
                         id:"2",
@@ -116,23 +123,56 @@
                         placeholder:"密码框",
                         prop:"input5",
                         type:"105",
-                        maxlength:12,
-                        minlength:8,
-                        onlyNumber:false,
-                        onlyLetter:false,
-                        needSpecial:false,
+                        maxlength:6,
+                        minlength:4,
+                        onlyNumber:1,
+                        onlyLetter:1,
+                        specialType:2,
                         showPassword:true,
+                        required:true,
                         rules:[
-                            { required: true, message: '请填写密码', trigger: 'blur' },
-                            { min: 8, max: 12, message: '长度在 8 到 12 个字符', trigger: 'change' },
+                            // { required: true, message: '请填写密码', trigger: 'blur' },
+                            // { min: 8, max: 12, message: '长度在 8 到 12 个字符', trigger: 'change' },
                         ]
-                    }
+                    },
+                    {
+                        id:"6",
+                        label:"邮箱",
+                        placeholder:"请输入邮箱地址",
+                        prop:"input6",
+                        type:"106",
+                        otherChar:false
+                    },
+                    {
+                        id:"7",
+                        label:"身份证",
+                        placeholder:"请输入身份证号",
+                        prop:"input7",
+                        type:"107",
+                    },
+                    {
+                        id:"8",
+                        label:"手机或电话号码",
+                        placeholder:"请输入手机或电话号码",
+                        prop:"input8",
+                        type:"108",
+                    },
+                    {
+                        id:"9",
+                        label:"上传",
+                        prop:"input9",
+                        spanNum:24,
+                        type:"109",
+                    },
                 ],
                 formData:{
                     input1:"5",
                     input2:null,
                     input3:"",
                     input4:"",
+                    input5:"",
+                    input6:"",
+                    input7:"",
                 },
                 rules:{
                     input5: [

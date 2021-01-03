@@ -9,7 +9,7 @@
 
 <script>
     export default {
-        name: "input-number",
+        name: "input-password",
         props:{
             value: {
                 type: String,
@@ -19,7 +19,7 @@
         methods:{
             updateValue:function (e) {
                 // 密码只能输入字母数字特殊字符
-                e= e.replace(/[^0-9a-zA-Z!@#$%^&*.]/g,"");
+                e= e.replace(/[^0-9a-zA-Z\.`~!@#$%^&*_\-]/g,"");
                 console.log(e)
                 this.$emit('input', e);
                 return  e;
