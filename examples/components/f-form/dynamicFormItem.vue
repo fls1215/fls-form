@@ -92,6 +92,14 @@
                 v-bind="$attrs"
                 v-on="$listeners"
         ></el-input>
+
+        <!-- 上传 -->
+        <upload
+            type="file"
+            v-if="$attrs.type == '109'"
+            v-bind="$attrs"
+            v-on="$listeners"
+        ></upload>
       </el-form-item>
 </template>
 <script>
@@ -99,6 +107,8 @@ import moneyInput from "./f-input-money1";
 import numberInput from "./f-input-number";
 import letterNumberInput from "./f-input-letters&numbers";
 import passwordInput from "./f-input-password";
+import upload from "./f-input-upload";
+
     export default{
         inheritAttrs :false,
         props:{
@@ -116,6 +126,7 @@ import passwordInput from "./f-input-password";
             numberInput,
             letterNumberInput,
             passwordInput,
+            upload
         },
         computed: {
             rules(){

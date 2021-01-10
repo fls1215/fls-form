@@ -46,6 +46,7 @@
                     v-for="list in lists"
                     :key="list.id"
                     :label = "list.label"
+                    :spanNum = "list.spanNum"
                     :prop="list.prop"
                     :type="list.type"
                     :placeholder = "list.placeholder"
@@ -63,6 +64,19 @@
                     :required="list.required"
                     v-model = "formData[list.prop]"
                     @input="handleInput($event, list.prop)"
+
+
+                    :action="list.action"
+                    :multiple="list.multiple"
+                    :data="list.data"
+                    :showFileList="list.showFileList"
+                    :drag="list.drag"
+                    :accept="list.accept"
+                    :listType="list.listType"
+                    :fileList="formData.input9"
+                    :limit="list.limit"
+
+
                 ></form-col>
                 
             </el-row>
@@ -163,6 +177,14 @@
                         prop:"input9",
                         spanNum:24,
                         type:"109",
+                        action:"https://jsonplaceholder.typicode.com/posts/",
+                        multiple:true,
+                        data:{},
+                        showFileList:true,
+                        drag:false,
+                        accept:"image/*",
+                        listType:"picture-card",
+                        limit:3,
                     },
                 ],
                 formData:{
@@ -173,6 +195,8 @@
                     input5:"",
                     input6:"",
                     input7:"",
+                    input8:"",
+                    input9:[{name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}, {name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
                 },
                 rules:{
                     input5: [
