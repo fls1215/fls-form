@@ -2,9 +2,10 @@
     <div class="f-upload">
         <el-upload
         v-bind="$attrs"
+        :file-list="fileList"
         :on-change="handleChange"
         >
-            <i slot="default" class="el-icon-plus" v-if="$attrs.limit - $attrs.fileList.length > 0"></i>
+            <i slot="default" class="el-icon-plus" v-if="$attrs.limit - this.fileList.length > 0"></i>
             <div slot="file" slot-scope="{file}">
             <img
                 class="el-upload-list__item-thumbnail"
@@ -47,6 +48,14 @@
         dialogVisible: false
       };
     },
+      props:{
+          fileList:{
+              type: Array,
+              default () {
+                  return []
+              }
+          }
+      },
     methods: {
         handleChange(response, file){
             console.log(response,file);
@@ -54,6 +63,9 @@
         },
       handleRemove(file) {
         console.log(file);
+        console.log(this.fileList);
+        let index = this.fileList.findIndex(item =>item.uid == file.uid);
+        this.fileList.splice(index,1);
       },
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;
