@@ -100,6 +100,18 @@
             v-bind="$attrs"
             v-on="$listeners"
         ></upload>
+
+        <!-- 下拉框 -->
+        
+
+        <!-- 单选组 -->
+        <el-radio-group
+        v-if="$attrs.type == '301'"
+        v-bind="$attrs"
+        v-on="$listeners"
+         >
+            <el-radio v-for="item in $attrs.list" :label="item.id" :key="item.id">{{item.value}}</el-radio>
+          </el-radio-group>
       </el-form-item>
 </template>
 <script>

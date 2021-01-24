@@ -15,7 +15,7 @@
         <!--106	input	邮件-->
         <!--107	input	身份证-->
         <!--108	input	电话-->
-        <!--109	input	上传-->
+        <!--109	input	上传 ,还需要多类型显示-->
         <!--201	下拉框	单选-->
         <!--202	下拉框	多选-->
         <!--203	下拉框	级联-->
@@ -76,6 +76,7 @@
                     :fileList="formData.input9"
                     :limit="list.limit"
 
+                    :list="list.list"
 
                 ></form-col>
                 
@@ -186,6 +187,17 @@
                         listType:"picture-card",
                         limit:3,
                     },
+                    {
+                        id:"31",
+                        label:"单选",
+                        prop:"input10",
+                        type:"301",
+                        list:[
+                            {id:1,value:"框1"},
+                            {id:2,value:"框2"},
+                            {id:3,value:"框3"}
+                        ]
+                    },
                 ],
                 formData:{
                     input1:"5",
@@ -197,6 +209,7 @@
                     input7:"",
                     input8:"",
                     input9:[{name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}, {name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
+                    input10:2
                 },
                 rules:{
                     input5: [
