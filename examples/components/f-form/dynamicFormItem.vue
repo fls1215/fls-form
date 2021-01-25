@@ -102,7 +102,18 @@
         ></upload>
 
         <!-- 下拉框 -->
-        
+        <el-select
+                v-if="$attrs.type == '201'"
+                v-bind="$attrs"
+                v-on="$listeners"
+        >
+            <el-option
+                    v-for="item in $attrs.list"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+            </el-option>
+        </el-select>
 
         <!-- 单选组 -->
         <el-radio-group

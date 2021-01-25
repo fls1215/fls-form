@@ -188,9 +188,34 @@
                         limit:3,
                     },
                     {
+                        id:"21",
+                        label:"下拉框",
+                        placeholder:"请选择",
+                        prop:"input21",
+                        type:"201",
+                        clearable:true,
+                        multiple:true,
+                        list:[{
+                            value: '选项1',
+                            label: '黄金糕'
+                        }, {
+                            value: '选项2',
+                            label: '双皮奶'
+                        }, {
+                            value: '选项3',
+                            label: '蚵仔煎'
+                        }, {
+                            value: '选项4',
+                            label: '龙须面'
+                        }, {
+                            value: '选项5',
+                            label: '北京烤鸭'
+                        }],
+                    },
+                    {
                         id:"31",
                         label:"单选",
-                        prop:"input10",
+                        prop:"input31",
                         type:"301",
                         list:[
                             {id:1,value:"框1"},
@@ -209,7 +234,8 @@
                     input7:"",
                     input8:"",
                     input9:[{name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}, {name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
-                    input10:2
+                    input21:"",
+                    input31:2
                 },
                 rules:{
                     input5: [
