@@ -1,8 +1,15 @@
 <template>
   <div id="app">
-    <!--<img alt="Vue logo" src="./assets/logo.png">-->
-    <demo></demo>
-    <!--<HelloWorld msg="Welcome to Your Vue.js App"/>-->
+    <div id="nav">
+      <!--<img alt="Vue logo" src="./assets/logo.png">-->
+      <!--<demo></demo>-->
+      <!--<HelloWorld msg="Welcome to Your Vue.js App"/>-->
+      <!--<router-link to="/">table</router-link>|-->
+      <!--<router-link to="/form">form</router-link>-->
+    </div>
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 
