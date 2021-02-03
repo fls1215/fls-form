@@ -1,6 +1,6 @@
 <template>
     <div class="grid filter">
-        默认全文搜索
+        默认全文搜索test1
         <vxe-grid
                 v-bind="gridOptions"
                 @header-cell-click="headerCellClickEvent"
