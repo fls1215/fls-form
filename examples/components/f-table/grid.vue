@@ -1,24 +1,38 @@
 <template>
     <div class="grid filter">
         默认全文搜索
-        <vxe-grid v-bind="gridOptions">
+        <vxe-grid
+                v-bind="gridOptions"
+                @header-cell-click="headerCellClickEvent"
+        >
             <template v-slot:toolbar_buttons>
                 <vxe-button @click="gridOptions.align = 'left'">居左</vxe-button>
                 <vxe-button @click="gridOptions.align = 'center'">居中</vxe-button>
                 <vxe-button @click="gridOptions.align = 'right'">居右</vxe-button>
             </template>
-
+            <!--输入筛选-->
             <template v-slot:input_default="{ column }">
                 <div class="slotBox">
-                    <p class="titleBox">{{column.title}}</p>
+                    <p class="titleBox" v-contextmenu:contextmenu>{{column.title}}
+                        <span v-if="column.sortable" class="custom-sort" :class="{'is-order': column.order}">
+                            <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
+                            <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
+                        </span>
+                    </p>
                     <div class="filterBox">
                         <el-input placeholder="搜索" size="mini" clearable :style="{textAlign:column.align}" v-model="filterElements[column.property]" @change="inputFilterChange($event,column.property)"></el-input>
                     </div>
                 </div>
             </template>
+            <!--下拉筛选-->
             <template v-slot:select_default="{ column }">
                 <div class="slotBox">
-                    <p class="titleBox">{{column.title}}</p>
+                    <p class="titleBox" v-contextmenu:contextmenu>{{column.title}}
+                        <span v-if="column.sortable" class="custom-sort" :class="{'is-order': column.order}">
+                            <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
+                            <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
+                        </span>
+                    </p>
                     <div class="filterBox">
                         <el-select
                                 v-model="filterElements[column.property]"
@@ -32,9 +46,15 @@
                     </div>
                 </div>
             </template>
+            <!--多选下拉-->
             <template v-slot:select_multiple="{ column }">
                 <div class="slotBox">
-                    <p class="titleBox">{{column.title}}</p>
+                    <p class="titleBox" v-contextmenu:contextmenu>{{column.title}}
+                        <span v-if="column.sortable" class="custom-sort" :class="{'is-order': column.order}">
+                            <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
+                            <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
+                        </span>
+                    </p>
                     <div class="filterBox">
                         <el-select
                                 v-model="filterElements[column.property]"
@@ -50,9 +70,15 @@
                     </div>
                 </div>
             </template>
+            <!--日期筛选-->
             <template v-slot:date_default="{ column }">
                 <div class="slotBox">
-                    <p class="titleBox">{{column.title}}</p>
+                    <p class="titleBox" v-contextmenu:contextmenu>{{column.title}}
+                        <span v-if="column.sortable" class="custom-sort" :class="{'is-order': column.order}">
+                            <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
+                            <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
+                        </span>
+                    </p>
                     <div class="filterBox">
                         <el-date-picker
                                 v-model="filterElements[column.property]"
@@ -67,21 +93,45 @@
                     </div>
                 </div>
             </template>
+            <!--默认项-->
+            <template v-slot:no_filter="{ column }">
+                <div class="slotBox">
+                    <p class="titleBox" v-contextmenu:contextmenu>{{column.title}}
+                        <span v-if="column.sortable" class="custom-sort custom-sort-nofilter" :class="{'is-order': column.order}">
+                            <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
+                            <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
+                        </span>
+                    </p>
+                </div>
+            </template>
 
             <!--翻译-->
-
             <template v-slot:trans_default="{ row }">
                 {{row.sex | filtersArr}}
             </template>
+
         </vxe-grid>
+
+        <v-contextmenu ref="contextmenu" @contextmenu="handleContextmenu">
+            <v-contextmenu-item :disabled="!hasFilter" @click="cancelFilter">清空所有筛选条件</v-contextmenu-item>
+            <v-contextmenu-submenu @submenu-show="handleSubmenuShow" title="固定">
+                <v-contextmenu-item :disabled="fixed=='left'" @click="leftFix">左固定</v-contextmenu-item>
+                <v-contextmenu-item :disabled="fixed=='right'" @click="rightFix">右固定</v-contextmenu-item>
+                <v-contextmenu-item :disabled="fixed=='null'" @click="cancelFix">取消固定</v-contextmenu-item>
+            </v-contextmenu-submenu>
+        </v-contextmenu>
     </div>
 </template>
 
 <script>
+
     let that;
     export default {
+
         data () {
             return {
+                //右键状态
+                fixed:null,//右键当前列的固定状态
                 gridOptions: {
                     ref:"filterTable",
                     border: true,
@@ -90,20 +140,21 @@
                     showOverflow: false,
                     height: 300,
                     align: 'left',
+                    sortConfig:{showIcon: false},
                     toolbarConfig: {
                         slots: {
                             buttons: 'toolbar_buttons'
                         }
                     },
                     columns: [
-                        { type: 'seq', width: 50 },
-                        { field: 'name', title: 'name',align:"right",filter:true,filterType:"input" },
-                        { field: 'sex', title: 'sex',filter:true,filterType:"select", slots: {
+                        { type: 'seq', width: 50,fixed:"left" },
+                        { field: 'name',width: 400, title: 'name',align:"right",filter:true,filterType:"input",sortable:true,fixed:"left" },
+                        { field: 'sex',width: 400, title: 'sex',filter:true,filterType:"select", slots: {
                                 default:"trans_default",
-                            }},
-                        { field: 'birthday', title: 'birthday',filter:true,filterType:"date", showOverflow: true},
-                        { field: 'address', title: 'Address', showOverflow: true,filter:true,filterType:"select_mult" },
-                        { field: 'role', title: 'role'}
+                            },sortable:true},
+                        { field: 'birthday',width: 400, title: 'birthday',filter:true,filterType:"date", showOverflow: true,sortable:true},
+                        { field: 'address',width: 400, title: 'Address', showOverflow: true,filter:true,filterType:"select_mult",sortable:true },
+                        { field: 'role',width: 400, title: 'role',sortable:true,fixed:"right"}
                     ],
                     data: [
                         { id: 10001, name: 'Test1', nickname: 'T1', role: 'Develop', sex: '00900', age: 0,birthday:'2021-02-01', address: 'Shenzhen' },
@@ -117,6 +168,7 @@
                     ]
                 },
                 filterElements:{},
+                hasFilter:false,
                 genderArr:[
                     {value:"00900",label:"Man"},
                     {value:"00901",label:"Women"},
@@ -129,6 +181,9 @@
                 // filterArray:{filters: [{operator: "like", column: "cusName", value: "2"}]}
             }
         },
+        mounted(){
+            console.log("filterElements",this.filterElements)
+        },
         filters: {
             filtersArr: function (value) {
                 let data = that.genderArr.find(item =>{
@@ -140,6 +195,8 @@
         },
         created(){
             that = this;
+
+            this.$set(this.filterElements,"name","")
             let filterElements = {};
             // 获取表格数据，给筛选框加值
             this.gridOptions.columns.map(item =>{
@@ -161,16 +218,64 @@
                             break;
                         default:
                             item.filter = false;
+                            item.slots.header = "no_filter";
                             break;
                     }
                     if(item.filter){
                         filterElements[item.field]="";
                     }
+                }else{
+                    // 如果没有筛选
+                    item.slots?item.slots:item.slots={};
+                    item.slots.header = "no_filter";
                 }
             })
-            this.filterElements={...filterElements}
+            // this.filterElements={...filterElements}
+            console.log("create")
         },
         methods:{
+            // 显示右键菜单
+            handleContextmenu(vm){
+                console.log(this.filterElements);
+                console.log(vm.elm.textContent);
+                // 只能获取到点击处的标签信息，取到文字，然后查找列信息
+                this.field = vm.elm.innerText;
+                const xTable = this.$refs.filterTable;
+                const column = xTable.getColumnByField(this.field);
+                this.fixed = column.fixed?column.fixed:"null";
+            },
+            // 显示子菜单
+            handleSubmenuShow (vm, placement) {
+                console.log(vm, placement)
+            },
+            cancelFilter(){
+                const xTable = this.$refs.filterTable;
+                this.hasFilter = false;
+                this.gridOptions.columns.map(item =>{
+                    item.filters = null;
+                })
+                this.filterElements = {};
+                xTable.clearFilter();
+                xTable.updateData()
+            },
+             leftFix () {
+                 const xTable = this.$refs.filterTable;
+                 const column = xTable.getColumnByField(this.field);
+                 column.fixed = "left";
+                 xTable.refreshColumn();
+            },
+            rightFix () {
+                const xTable = this.$refs.filterTable;
+                const column = xTable.getColumnByField(this.field);
+                column.fixed = "right";
+                xTable.refreshColumn();
+            },
+            cancelFix () {
+                const xTable = this.$refs.filterTable;
+                const column = xTable.getColumnByField(this.field);
+                column.fixed = null;
+                xTable.refreshColumn();
+            },
             inputFilterChange(v,field){
 
                 const xTable = this.$refs.filterTable;
@@ -188,7 +293,8 @@
                 }else{
                     column.filters = undefined;
                 }
-
+                this.hasFilter = true;
+                debugger
                 xTable.updateData()
             },
             selectFilterChange(v,field){
@@ -208,7 +314,7 @@
                     data.push(item);
                 })
                 xTable.setFilter(column, data);
-
+                this.hasFilter = true;
                 xTable.updateData()
             },
             multSelectFilterChange(v,field){
@@ -229,9 +335,21 @@
                 })
 
                 xTable.setFilter(column, data);
-
+                this.hasFilter = true;
                 xTable.updateData()
-            }
+            },
+            headerCellClickEvent ({ column, triggerResizable, triggerSort, triggerFilter }) {
+                // 如果触发了列的其他功能按钮
+                if (column.sortable && !(triggerResizable || triggerSort || triggerFilter)) {
+                    if (column.order === 'desc') {
+                        this.$refs.filterTable.clearSort()
+                    } else if (column.order === 'asc') {
+                        this.$refs.filterTable.sort(column.property, 'desc')
+                    } else {
+                        this.$refs.filterTable.sort(column.property, 'asc')
+                    }
+                }
+            },
         }
     }
 
@@ -255,7 +373,11 @@
         position: absolute;
         top: 0;
         left:0;
+        bottom:0;
         width: calc(100% - 1px );
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
     }
     .grid .vxe-cell--title{
         width: 100%;
@@ -283,4 +405,16 @@
     .grid .vxe-table .vxe-header--column.col--ellipsis{
         height: 68px;
     }
+
+    .grid .custom-sort {
+        padding: 0px 12px 2px;
+        position: relative;
+    }
+    .grid .custom-sort.is-order {
+        color: #409eff;
+    }
+    .grid .custom-sort.custom-sort-nofilter{
+        padding: 0px 12px 1px;
+    }
+
 </style>

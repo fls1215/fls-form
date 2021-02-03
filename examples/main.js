@@ -21,6 +21,14 @@ Vue.prototype.$XPrint = VXETable.print
 Vue.prototype.$XSaveFile = VXETable.saveFile
 Vue.prototype.$XReadFile = VXETable.readFile
 
+// 右键事件
+// import VueContextMenu from 'vue-contextmenu'
+// Vue.use(VueContextMenu)
+import contentmenu from 'v-contextmenu'
+import 'v-contextmenu/dist/index.css'
+Vue.use(contentmenu)
+
+
 Vue.config.productionTip = false
 
 new Vue({
