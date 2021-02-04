@@ -9,6 +9,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "core-js": "^3.8.1",
+    "el-tree-transfer": "^2.4.7",
     "element-ui": "^2.14.1",
     "v-contextmenu": "^2.9.0",
     "vue": "^2.6.12",
