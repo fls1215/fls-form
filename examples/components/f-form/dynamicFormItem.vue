@@ -121,8 +121,26 @@
         v-bind="$attrs"
         v-on="$listeners"
          >
-            <el-radio v-for="item in $attrs.list" :label="item.id" :key="item.id">{{item.value}}</el-radio>
-          </el-radio-group>
+            <el-radio v-for="item in $attrs.list" :label="item.id" :key="item.id" :disabled="item.disabled">{{item.value}}</el-radio>
+         </el-radio-group>
+        <!--复选组-->
+        <el-checkbox-group
+                v-if="$attrs.type == '401'"
+                v-bind="$attrs"
+                v-on="$listeners"
+        >
+            <el-checkbox v-for="item in $attrs.list" :label="item.id" :key="item.id" :disabled="item.disabled">{{item.value}}</el-checkbox>
+        </el-checkbox-group>
+
+        <!--文本域-->
+        <el-input
+                v-if="$attrs.type == '501'"
+                v-bind="$attrs"
+                v-on="$listeners"
+                type="textarea"
+                :rows="$attrs.rows">
+        </el-input>
+
       </el-form-item>
 </template>
 <script>

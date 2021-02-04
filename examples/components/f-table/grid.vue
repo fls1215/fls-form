@@ -10,7 +10,9 @@
                 <vxe-button @click="gridOptions.align = 'right'">居右</vxe-button>
             </template>
             <template v-slot:display_columns>
-                <vxe-button type="text" icon="vxe-icon--menu" class="tool-btn" @click="openTreeTransfer"></vxe-button>
+                <div class="iconBox">
+                    <i class="el-icon-view" @click="openTreeTransfer"></i>
+                </div>
             </template>
             <!--vxe-grid没有使用vxe-table-colgroup的例子，所以这里自行实现-->
             <!--输入筛选-->
@@ -98,7 +100,7 @@
             </template>
             <!--默认项-->
             <template v-slot:no_filter="{ column }">
-                <div class="slotBox">
+                <div class="slotBox onlyTitle">
                     <p class="titleBox" v-contextmenu:contextmenu @click.stop="sortChange(column)">{{column.title}}
                         <span v-if="column.sortable" class="custom-sort custom-sort-nofilter" :class="{'is-order': column.order}">
                             <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
@@ -135,9 +137,9 @@
         </v-contextmenu>
         <!--穿梭树-->
         <el-dialog
-                title="提示"
+                title="切换列的显示"
                 :visible.sync="dialogVisible"
-                width="30%">
+                width="50%">
             <!--// 使用树形穿梭框组件-->
             <tree-transfer :title="title" :from_data='fromData' :to_data='toData' :defaultProps="{label:'label'}" @add-btn='add' @remove-btn='remove' :mode='mode' height='540px' filter openAll>
             </tree-transfer>
@@ -198,7 +200,7 @@
                 // filterArray:{filters: [{operator: "like", column: "cusName", value: "2"}]}
                 // 穿梭树
                 mode: "transfer", // transfer addressList
-                title:['源数据','目标数据'],
+                title:['未显示列','显示列'],
                 fromData:[
                     {
                         id: "1",
@@ -264,49 +266,91 @@
         },
         methods:{
             getColumn(){
+                // let column = [
+                //     { type: 'seq', width: 50,fixed:"left" },
+                //     { field: 'name',width: 400, title: 'name',align:"right",filter:true,filterType:"input",sortable:true,fixed:"left" },
+                //     { field: 'sex',width: 400, title: 'sex',filter:true,filterType:"select", slots: {
+                //             default:"trans_default",
+                //         },sortable:true},
+                //     { field: 'birthday',width: 400, title: 'birthday',filter:true,filterType:"date", showOverflow: true,sortable:true},
+                //     { field: 'address',width: 400, title: 'Address', showOverflow: true,filter:true,filterType:"select_mult",sortable:true },
+                //     { field: 'role',width: 400, title: 'role',sortable:true,fixed:"right"}
+                // ];
                 let column = [
                     { type: 'seq', width: 50,fixed:"left" },
-                    { field: 'name',width: 400, title: 'name',align:"right",filter:true,filterType:"input",sortable:true,fixed:"left" },
-                    { field: 'sex',width: 400, title: 'sex',filter:true,filterType:"select", slots: {
-                            default:"trans_default",
-                        },sortable:true},
-                    { field: 'birthday',width: 400, title: 'birthday',filter:true,filterType:"date", showOverflow: true,sortable:true},
+                    {
+                        field: 'name',
+                        width: 400,
+                        title: 'name',
+                        align: "right",
+                        filter: true,
+                        filterType: "input",
+                        sortable: true,
+                        fixed: "left"
+                    },
+                    {
+                        title: '基本信息',
+                        children: [
+                            {
+                                field: 'sex', width: 400, title: 'sex', filter: true, filterType: "select", slots: {
+                                    default: "trans_default",
+                                }, sortable: true
+                            },
+                            {
+                                field: 'birthday',
+                                width: 400,
+                                title: 'birthday',
+
+                                showOverflow: true,
+                                sortable: true
+                            },
+                        ]
+                    },
                     { field: 'address',width: 400, title: 'Address', showOverflow: true,filter:true,filterType:"select_mult",sortable:true },
                     { field: 'role',width: 400, title: 'role',sortable:true,fixed:"right"}
                 ];
                 this.$set(this.gridOptions,"columns",column);
+
+                // 多表头
+                this.formatColumn(this.gridOptions.columns);
+            },
+            formatColumn(columns){
                 // 在不赋值的情况下，空对象下的属性可以响应。如果需要对筛选回显，需要$set或者将filterElements的值循环赋上
                 // let filterElements = {};
                 // 获取表格数据，给筛选框加值
-                this.gridOptions.columns.map(item =>{
-                    if(item.filter){
-                        // 如果写了filter为true,但没给我传filterType,默认filter为false。
-                        item.slots?item.slots:item.slots={};
-                        switch (item.filterType){
-                            case "input":
-                                item.slots.header = "input_default";
-                                break;
-                            case "select":
-                                item.slots.header = "select_default";
-                                break;
-                            case "select_mult":
-                                item.slots.header = "select_multiple";
-                                break;
-                            case "date":
-                                item.slots.header = "date_default";
-                                break;
-                            default:
-                                item.filter = false;
-                                item.slots.header = "no_filter";
-                                break;
-                        }
-                        // if(item.filter){
-                        //     filterElements[item.field]="";
-                        // }
+                columns.map(item =>{
+                    if(item.children){
+                        this.formatColumn(item.children)
                     }else{
-                        // 如果没有筛选
-                        item.slots?item.slots:item.slots={};
-                        item.slots.header = "no_filter";
+                        if(item.filter){
+                            // 如果写了filter为true,但没给我传filterType,默认filter为false。
+                            item.slots?item.slots:item.slots={};
+                            switch (item.filterType){
+                                case "input":
+                                    item.slots.header = "input_default";
+                                    break;
+                                case "select":
+                                    item.slots.header = "select_default";
+                                    break;
+                                case "select_mult":
+                                    item.slots.header = "select_multiple";
+                                    break;
+                                case "date":
+                                    item.slots.header = "date_default";
+                                    break;
+                                default:
+                                    item.filter = false;
+                                    item.slots.header = "no_filter";
+                                    break;
+                            }
+                            // if(item.filter){
+                            //     filterElements[item.field]="";
+                            // }
+                        }else{
+                            // 如果没有筛选
+                            item.slots?item.slots:item.slots={};
+                            item.slots.header = "no_filter";
+                        }
                     }
                 })
                 // this.filterElements={...filterElements}
@@ -467,7 +511,7 @@
                 this.$set(this.gridOptions,"data",data);
             },
             openTreeTransfer(){
-
+                this.dialogVisible = true;
             },
             // 切换模式 现有树形穿梭框模式transfer 和通讯录模式addressList
             changeMode() {
@@ -505,7 +549,7 @@
         background: #ffffff;
     }
     .titleBox{
-        padding:5px 10px;
+        padding:2px 10px;
         margin: 0;
         line-height: 20px;
         overflow: hidden;
@@ -519,8 +563,11 @@
         bottom:0;
         width: calc(100% - 1px );
         display: flex;
-        justify-content: center;
+        justify-content: flex-end;
         flex-direction: column;
+    }
+    .grid .onlyTitle{
+        justify-content: center;
     }
     .grid .vxe-cell--title{
         width: 100%;
@@ -546,7 +593,10 @@
         padding: 0!important;
     }
     .grid .vxe-table .vxe-header--column.col--ellipsis{
-        height: 68px;
+        height: 62px;
+    }
+    .grid .vxe-table .vxe-header--column.col--ellipsis.col--group{
+        height: 30px;
     }
 
     .table .custom-sort {
@@ -564,5 +614,21 @@
     }
     .table .el-transfer-panel__header {
         text-align: left;
+    }
+    .iconBox{
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border:1px solid #ddd;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .iconBox:hover{
+        border:1px solid #409eff;
+        color:#409eff;
+    }
+    .iconBox i{
+        font-size: 20px;
     }
 </style>

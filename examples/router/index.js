@@ -13,7 +13,7 @@ const routes = [
     {
         path:"/form",
         name:'form',
-        component:()=> import(/* webpackChunkName:"form"*/'../components/demo')
+        component:()=> import(/* webpackChunkName:"form"*/'../components/f-form/dynamicForm.vue')
     }
 ]
 
