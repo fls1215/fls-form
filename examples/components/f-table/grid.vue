@@ -13,8 +13,13 @@
                 <!--<vxe-button @click="gridOptions.align = 'right'">居右</vxe-button>-->
             </template>
             <template v-slot:display_columns>
-                <div class="iconBox">
-                    <i class="el-icon-view" @click="openTreeTransfer"></i>
+                <div class="iconBoxs">
+                    <div class="iconBox">
+                        <i class="el-icon-view" @click="openTreeTransfer"></i>
+                    </div>
+                    <div class="iconBox">
+                        <i class="el-icon-printer" @click="printEvent"></i>
+                    </div>
                 </div>
             </template>
             <!--vxe-grid没有使用vxe-table-colgroup的例子，所以这里自行实现-->
@@ -28,7 +33,42 @@
                         </span>
                     </p>
                     <div class="filterBox">
-                        <el-input placeholder="搜索" size="mini" clearable :style="{textAlign:column.align}" v-model="filterElements[column.property]" @change="inputFilterChange($event,column.property)"></el-input>
+                        <!--输入的筛选类型-->
+                        <div class="types">
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'equal'">=</div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'startswith'">
+                                <span class="sel">ab</span>c
+                            </div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'contains'">
+                                a<span class="sel">b</span>c
+                            </div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'notcontains'"> d </div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'greater'"> > </div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'less'"> < </div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'between'"> |-| </div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'notequal'"> ≠ </div>
+                            <div class="filterTypes">
+                                <el-select v-model="column.params.filterWayValue" placeholder="请选择" v-if="column.params.filterWay == 'str'">
+                                    <el-option
+                                            v-for="item in strTypeoptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                                <el-select v-model="column.params.filterWayValue" placeholder="请选择" v-if="column.params.filterWay == 'num'">
+                                    <el-option
+                                            v-for="item in numTypeoptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                        <div class="filterContent">
+                            <el-input placeholder="搜索" size="mini" clearable :style="{textAlign:column.align}" v-model="filterElements[column.property]" @change="inputFilterChange($event,column.property)"></el-input>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -88,16 +128,37 @@
                         </span>
                     </p>
                     <div class="filterBox">
-                        <el-date-picker
-                                v-model="filterElements[column.property]"
-                                clearable
-                                format="yyyy-MM-dd"
-                                value-format="yyyy-MM-dd"
-                                type="date"
-                                placeholder="选择日期"
-                                @change="inputFilterChange($event,column.property)"
-                        >
-                        </el-date-picker>
+                        <!--输入类型-->
+                        <div class="types">
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'year'">Y</div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'month'">M</div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'monthRange'">M-M</div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'date'">D</div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'moreDate'">||</div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'dateRange'">D-D</div>
+                            <div class="filterTypes">
+                                <el-select v-model="column.params.filterWayValue" placeholder="请选择" v-if="column.params.filterWay == 'date'">
+                                    <el-option
+                                            v-for="item in dateTypeoptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                        <div class="filterContent">
+                            <el-date-picker
+                                    v-model="filterElements[column.property]"
+                                    clearable
+                                    format="yyyy-MM-dd"
+                                    value-format="yyyy-MM-dd"
+                                    type="date"
+                                    placeholder="选择日期"
+                                    @change="inputFilterChange($event,column.property)"
+                            >
+                            </el-date-picker>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -212,6 +273,59 @@
                     {value:"Guangzhou",label:"Guangzhou"},
                     {value:"Shanghai",label:"Shanghai"},
                 ],
+                // 解决多维数据的参数获取问题
+                // 筛选方法
+                // 字符串筛选 filterWay:str;filterWayValue:contains(默认为包含)
+                strTypeoptions:[ {
+                    value: 'equal',
+                    label: '等于'
+                }, {
+                    value: 'startswith',
+                    label: '首部'
+                },{
+                    value: 'contains',
+                    label: '包含'
+                }, {
+                    value: 'notcontains',
+                    label: '不包含'
+                }],
+                // 数字筛选 filterWay:num;filterWayValue:equal(默认为等于)
+                numTypeoptions:[ {
+                    value: 'equal',
+                    label: '等于'
+                }, {
+                    value: 'greater',
+                    label: '大于'
+                }, {
+                    value: 'less',
+                    label: '小于'
+                },{
+                    value: 'between',
+                    label: '介于'
+                },{
+                    value: 'notequal',
+                    label: '不等于'
+                }],
+                //时间筛选 filterWay:date;filterWayValue:date(默认为年月日)
+                dateTypeoptions:[ {
+                    value: 'year',
+                    label: '年'
+                }, {
+                    value: 'month',
+                    label: '年月'
+                }, {
+                    value: 'monthRange',
+                    label: '月份范围'
+                },{
+                    value: 'date',
+                    label: '年月日'
+                },{
+                    value: 'dateRange',
+                    label: '日期范围'
+                },{
+                    value: 'moreDate',
+                    label: '多个日期'
+                }],
 
                 // 穿梭树
                 mode: "transfer", // transfer addressList
@@ -558,8 +672,6 @@
                 console.log("fromData:", fromData);
                 console.log("toData:", toData);
                 console.log("addobj:", obj);
-                // this.fromDataTemp = fromData;
-                // this.toDataTemp = toData;
                 this.addObj = obj;
 
             },
@@ -570,8 +682,6 @@
                 console.log("fromData:", fromData);
                 console.log("toData:", toData);
                 console.log("obj:", obj);
-                // this.fromDataTemp = fromData;
-                // this.toDataTemp = toData;
                 this.removeObj = obj;
 
             },
@@ -581,11 +691,12 @@
                     // 单表头
                     column = [
                         { type: 'seq', width: 50, title:'序号',disabled: true,fixed:"left" },
-                        { field: 'name',id:"name",prentField:0,width: 400, title: 'name',align:"right",filter:true,filterType:"input",sortable:true,fixed:"left",editRender: { name: '$input' } },
+                        { field: 'name',id:"name",prentField:0,width: 400, title: 'name',align:"right",filter:true,filterType:"input",filterWay:'str',filterWayValue:'contains',sortable:true,fixed:"left",editRender: { name: '$input' } },
                         { field: 'sex',id:"sex",prentField:0,width: 400, title: 'sex',filter:true,filterType:"select", slots: {
                                 default:"trans_default",
                             },sortable:true,editRender: { name: '$select',options:this.genderArr}},
-                        { field: 'birthday',id:"birthday",prentField:0,width: 400, title: 'birthday',filter:true,filterType:"date", showOverflow: true,sortable:true},
+                        { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",filterWay:'num',filterWayValue:'equal',sortable:true,editRender: { name: '$input' } },
+                        { field: 'birthday',id:"birthday",prentField:0,width: 400, title: 'birthday',filter:true,filterType:"date",filterWay:'date',filterWayValue:'date', showOverflow: true,sortable:true},
                         { field: 'address',id:"address",prentField:0,width: 400, title: 'Address', showOverflow: true,filter:true,filterType:"select_mult",sortable:true },
                         { field: 'role',id:"role",prentField:0,width: 400, title: 'role',sortable:true,visible:false},
                         { title: '操作',id:"operate",prentField:0, width: 200,disabled: true,slots: { default: 'operate' },fixed:"right" }
@@ -604,8 +715,13 @@
                             filter: true,
                             filterType: "input",
                             sortable: true,
-                            fixed: "left"
+                            fixed: "left",
+                            params:{
+                                filterWay:'str',
+                                filterWayValue:'contains'
+                            }
                         },
+                        { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal'} },
                         {
                             id:'base',
                             prentField:0,
@@ -623,9 +739,14 @@
                                     id:'birthday',
                                     prentField:"base",
                                     title: 'birthday',
-
+                                    filter:true,
+                                    filterType:"date",
                                     showOverflow: true,
                                     sortable: true,
+                                    params:{
+                                        filterWay:'date',
+                                        filterWayValue:'date'
+                                    }
                                 },
                             ]
                         },
@@ -648,6 +769,10 @@
                     this.fromData = this.formatTransferHide(JSON.parse(JSON.stringify(column)));
                     console.log("column",this.toData)
                 }
+            },
+            // 打印
+            printEvent(){
+                this.$refs.filterTable.print()
             }
         }
     }
@@ -733,9 +858,13 @@
     .table .el-transfer-panel__header {
         text-align: left;
     }
+    .iconBoxs{
+        display: flex;
+    }
     .iconBox{
         width: 34px;
         height: 34px;
+        margin-left:10px;
         border-radius: 50%;
         border:1px solid #ddd;
         display: flex;
@@ -761,6 +890,35 @@
     .operate span:hover{
         text-decoration: underline;
         color:#409eff;
+    }
+    .filterContent{
+        width: calc(100% - 34px);
+    }
+    .types{
+        position: relative;
+        width: 34px;
+        height: 100%;
+        float: left;
+    }
+    .filterIcon{
+        width: 30px;
+        margin-right: 4px;
+        text-align: center;
+        line-height: 28px;
+        font-size: 12px;
+    }
+    .filterIcon .sel{
+        background: #aaa;
+        color:#fff;
+    }
+    .filterTypes{
+        position: absolute;
+        opacity: 0.5;
+        opacity: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
     }
 </style>
 
