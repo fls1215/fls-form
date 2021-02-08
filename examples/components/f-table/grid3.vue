@@ -3,29 +3,16 @@
         <p>列头右键快捷菜单</p>
         筛选条件：{{filtersData}}
         <vxe-grid
-            class="grid"
-            v-bind="$attrs"
-            ref="filterTable"
-            :border="border"
-            :resizable="resizable"
-            :showHeaderOverflow="showHeaderOverflow"
-            :align="align"
-            :sortConfig="sortConfig"
-            :filterConfig="filterConfig"
-            :editConfig="editConfig"
-            :keepSource="keepSource"
-            :pagerConfig="pagerConfig"
-            :toolbarConfig="toolbarConfig"
-            :loading="gridLoading"
-            :columns="columns"
-            :data="data"
-            @page-change="handlePageChange"
-            v-on="$listeners"
+                class="grid"
+                v-bind="gridOptions"
+                @page-change="handlePageChange"
         >
             <template v-slot:toolbar_buttons>
-                <vxe-button @click="align = 'left'">居左</vxe-button>
-                <vxe-button @click="align = 'center'">居中</vxe-button>
-                <vxe-button @click="align = 'right'">居右</vxe-button>
+                <vxe-button @click="changeColumn('only')">单表头</vxe-button>
+                <vxe-button @click="changeColumn('many')">多表头</vxe-button>
+                <!--<vxe-button @click="gridOptions.align = 'left'">居左</vxe-button>-->
+                <!--<vxe-button @click="gridOptions.align = 'center'">居中</vxe-button>-->
+                <!--<vxe-button @click="gridOptions.align = 'right'">居右</vxe-button>-->
             </template>
             <template v-slot:display_columns>
                 <div class="iconBoxs">
@@ -84,7 +71,7 @@
 
                         <div class="filterContent" v-if="column.params.filterWayValue == 'between'">
                             <el-input  class="filterOther" placeholder="搜索" size="mini" clearable :style="{textAlign:column.align}" v-model="lessElements[column.property]" @change="lessChange($event,column.property)"></el-input>
-                          —  <el-input class="filterOther" placeholder="搜索" size="mini" clearable :style="{textAlign:column.align}" v-model="greatElements[column.property]" @change="greatChange($event,column.property)"></el-input>
+                            —  <el-input class="filterOther" placeholder="搜索" size="mini" clearable :style="{textAlign:column.align}" v-model="greatElements[column.property]" @change="greatChange($event,column.property)"></el-input>
                         </div>
                         <div class="filterContent" v-else>
                             <el-input placeholder="搜索1" size="mini" clearable :style="{textAlign:column.align}" v-model="filterElements[column.property]" @change="inputFilterChange($event,column.property)"></el-input>
@@ -239,7 +226,7 @@
         <!--穿梭树-->
         <el-dialog
                 title="切换列的显示"
-                :visible.sync="transferDialogVisible"
+                :visible.sync="dialogVisible"
                 :close-on-click-modal="false"
                 width="50%">
             <!--// 使用树形穿梭框组件-->
@@ -259,26 +246,44 @@
     let that;
     export default {
         components:{ treeTransfer }, // 注册
-        inheritAttrs: false,
         data () {
             return {
                 //右键状态
                 fixed:null,//右键当前列的固定状态
                 gridLoading:false,
-                // 表格配置
-                ref:"filterTable",
-                sortConfig:{showIcon: false},
-                filterConfig:{showIcon: false,remote: true},
-                pagerConfig: {
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 10,
-                    pageSizes: [10, 20, 50, 100, 200, 500]
+                gridOptions: {
+                    ref:"filterTable",
+                    border: true,
+                    resizable: true,
+                    showHeaderOverflow: true,
+                    showOverflow: false,
+                    autoResize:true,
+                    align: 'left',
+                    sortConfig:{showIcon: false},
+                    filterConfig:{showIcon: false},
+                    editConfig: {
+                        trigger: 'manual',
+                        mode: 'row',
+                        showStatus: true,
+                        icon: 'fa fa-file-text-o'
+                    },
+                    keepSource:true,
+                    pagerConfig: {
+                        total: 0,
+                        currentPage: 1,
+                        pageSize: 10,
+                        pageSizes: [10, 20, 50, 100, 200, 500]
+                    },
+                    toolbarConfig: {
+                        slots: {
+                            buttons: 'toolbar_buttons',
+                            tools:"display_columns"
+                        }
+                    },
+                    loading:this.gridLoading,
+                    columns: [],
+                    data: []
                 },
-                // 列头数据
-                columns:[],
-                //表格数据
-                data:[],
                 gridPage:{
                     currentPage: 1,
                     pageSize: 10,
@@ -350,7 +355,6 @@
                     value: 'dates',
                     label: '多个日期'
                 }],
-                //数据格式化
                 dateFormat:{
                     date:"yyyy-MM-dd",
                     dates:"yyyy-MM-dd",
@@ -366,91 +370,15 @@
                 toData:[],//显示列
                 fromDataTemp:null,//未显示列暂存
                 toDataTemp:null,//显示列暂存
-                addObj:null,//新选中的列头数据
-                removeObj:null,//新隐藏的列头数据
+                addObj:null,//新增列头
+                removeObj:null,//隐藏列头
                 // 弹框
-                transferDialogVisible:false,
+                dialogVisible:false,
+
             }
         },
-        props:{
-            border:{
-                type: Boolean,
-                default:true
-            },
-            resizable:{
-                type: Boolean,
-                default:true
-            },
-            showHeaderOverflow:{
-                type: Boolean,
-                default:true
-            },
-            autoResize:{
-                type: Boolean,
-                default:true
-            },
-            keepSource:{
-                type: Boolean,
-                default:true
-            },
-            align:{
-                type: String,
-                default:'left'
-            },
-            editConfig:{
-                type: Object,
-                default:() => {
-                    return {
-                        trigger: 'manual',
-                        mode: 'row',
-                        showStatus: true,
-                        icon: 'fa fa-file-text-o'
-                    }
-                }
-            },
-            toolbarConfig:{
-                type: Object,
-                default:() => {
-                    return {
-                        slots: {
-                            buttons: 'toolbar_buttons',
-                            tools:"display_columns"
-                        }
-                    }
-                }
-            },
-            tableColumns:{
-                type: Array,
-                default:() => {
-                    return []
-                }
-            },
-            tableDatas:{
-                type: Array,
-                default:() => {
-                    return []
-                }
-            },
-        },
-        watch:{
-            tableColumns:{
-                handler(newVal, oldVal) {
-                    this.columns = this.tableColumns;
-                    this.getColumn();
-                    console.log("tableColumns",this.tableColumns)
-                },
-                deep: true
-            },
-            tableDatas:{
-                handler(newVal, oldVal) {
-                    this.data = this.tableDatas;
-                    this.gridLoading = false;
-                    console.log("tableDatas",this.tableDatas)
-                },
-                deep: true
-            },
-        },
         mounted(){
+            console.log("filterElements",this.filterElements)
             this.$nextTick(()=>{
                 this.gridLoading=false;
             })
@@ -466,20 +394,15 @@
         created(){
             that = this;
             this.gridLoading=true;
+            this.changeColumn('many');
+            // this.getColumn();
+            this.getData();
             this.getPage();
             console.log("create")
         },
         methods:{
             getColumn(){
-                this.formatColumn(this.columns);
-                // 显示列头情况
-                if(this.toolbarConfig&&this.toolbarConfig.slots&&this.toolbarConfig.slots.tools&&this.toolbarConfig.slots.tools == "display_columns"){
-                    console.log("column",this.columns)
-                    this.toData = this.formatTransferShow(JSON.parse(JSON.stringify(this.columns)));
-                    console.log("column",this.fromData)
-                    this.fromData = this.formatTransferHide(JSON.parse(JSON.stringify(this.columns)));
-                    console.log("column",this.toData)
-                }
+                this.formatColumn(this.gridOptions.columns);
             },
             formatColumn(columns){
                 // 在不赋值的情况下，空对象下的属性可以响应。如果需要对筛选回显，需要$set或者将filterElements的值循环赋上
@@ -550,6 +473,21 @@
                 }
                 return columns;
             },
+            getData(){
+                let data = [
+                    { id: 10001, name: 'Test1', nickname: 'T1', role: 'Develop', sex: '00900', age: '0',birthday:'2021-02-01', address: 'Shenzhen' },
+                    { id: 10002, name: 'Test2', nickname: 'T2', role: 'Test', sex: '00901', age: '22',birthday:'2021-02-11', address: 'Guangzhou' },
+                    { id: 10003, name: 'Test3', nickname: 'T3', role: 'PM', sex: '00900', age: '100',birthday:'2021-02-22', address: 'Shanghai' },
+                    { id: 10004, name: 'Test4', nickname: 'T4', role: 'Designer', sex: '00901', age: '70',birthday:'2021-02-11', address: 'Shenzhen' },
+                    { id: 10005, name: 'Test5', nickname: 'T5', role: 'Develop', sex: '00901', age: '10',birthday:'2021-02-08', address: 'Shanghai' },
+                    { id: 10006, name: 'Test6', nickname: 'T6', role: 'Designer', sex: '00901', age: '90',birthday:'2021-02-10', address: 'Shenzhen' },
+                    { id: 10007, name: 'Test7', nickname: 'T7', role: 'Test', sex: '00900', age: '5',birthday:'2021-02-21', address: 'Shenzhen' },
+                    { id: 10008, name: 'Test8', nickname: 'T8', role: 'Develop', sex: '00900', age: '80',birthday:'2021-02-11', address: 'Shenzhen' },
+                    { id: 10009, name: 'Test9', nickname: 'T9', role: 'Designer', sex: '00901', age: '90',birthday:'2021-02-10', address: 'Shenzhen' },
+                    { id: 10010, name: 'Test10', nickname: 'T10', role: 'Test', sex: '00900', age: '5',birthday:'2021-02-21', address: 'Shenzhen' },
+                ];
+                this.$set(this.gridOptions,"data",data);
+            },
             getPage(){
 
             },
@@ -570,22 +508,20 @@
             // 取消全部筛选
             cancelFilter(){
                 const xTable = this.$refs.filterTable;
-                this.columns.map(item =>{
+                this.gridOptions.columns.map(item =>{
                     item.filters = null;
                 })
                 this.filterElements = {};
                 this.filtersData = {};
                 xTable.clearFilter();
-                this.gridLoading = true;
-                this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:this.gridPage})
-                // xTable.updateData()
+                xTable.updateData()
             },
             // 左固定
-             leftFix () {
-                 const xTable = this.$refs.filterTable;
-                 const column = xTable.getColumnByField(this.field);
-                 column.fixed = "left";
-                 xTable.refreshColumn();
+            leftFix () {
+                const xTable = this.$refs.filterTable;
+                const column = xTable.getColumnByField(this.field);
+                column.fixed = "left";
+                xTable.refreshColumn();
             },
             // 右固定
             rightFix () {
@@ -615,9 +551,7 @@
                     }
                 }
                 this.filtersData = filtersData;
-                this.gridLoading = true;
-                this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:this.gridPage})
-                // xTable.updateData();
+                xTable.updateData();
             },
             // 输入框回车触发
             inputFilterChange(v,field){
@@ -644,29 +578,29 @@
                 const xTable = this.$refs.filterTable;
                 const column = xTable.getColumnByField(field);
 
-                    if(!column.filters){
-                        column.filters = [{}];
-                    }
+                if(!column.filters){
+                    column.filters = [{}];
+                }
 
-                    const option = column.filters[0];
+                const option = column.filters[0];
 
-                    // 第一种方法
+                // 第一种方法
                 // option.value?option.value:option.value = {};
                 // this.filterElements[field]?this.filterElements[field]:this.filterElements[field] = {};
                 // this.$set(this.filterElements[field],type,v);
                 // 第二种方法
-                    option.value?option.value:option.value = {min:null,max:null};
-                    option.value[type] = v;
-                    option.checked = true;
+                option.value?option.value:option.value = {min:null,max:null};
+                option.value[type] = v;
+                option.checked = true;
 
-                    this.$set(this.filterElements,field,option.value);
-                    console.log(option.value)
+                this.$set(this.filterElements,field,option.value);
+                console.log(option.value)
 
-                    // 如果最大最小都为空，清除筛选
-               if(!option.value["min"]&&!option.value["max"]){
-                   column.filters = undefined;
-                   this.$set(this.filterElements,field,"");
-               }
+                // 如果最大最小都为空，清除筛选
+                if(!option.value["min"]&&!option.value["max"]){
+                    column.filters = undefined;
+                    this.$set(this.filterElements,field,"");
+                }
                 this.joinFilter();
             },
             //输入框范围的最小值
@@ -682,7 +616,8 @@
                 this.$set(this.filterElements,field,"");
                 const xTable = this.$refs.filterTable;
                 const column = xTable.getColumnByField(field);
-                    column.filters = undefined;
+                column.filters = undefined;
+                this.joinFilter();
             },
             // 下拉会触发
             selectFilterChange(v,field){
@@ -727,28 +662,27 @@
             },
             // 排序操作会触发
             sortChange (column) {
-                    if (column.order === 'desc') {
-                        this.$refs.filterTable.clearSort()
-                    } else if (column.order === 'asc') {
-                        this.$refs.filterTable.sort(column.property, 'desc')
-                    } else {
-                        this.$refs.filterTable.sort(column.property, 'asc')
-                    }
+                if (column.order === 'desc') {
+                    this.$refs.filterTable.clearSort()
+                } else if (column.order === 'asc') {
+                    this.$refs.filterTable.sort(column.property, 'desc')
+                } else {
+                    this.$refs.filterTable.sort(column.property, 'asc')
+                }
             },
             // 分页操作会触发
             handlePageChange ({ currentPage, pageSize }) {
                 alert("静态数据模拟");
                 this.gridPage.currentPage = currentPage;
                 this.gridPage.pageSize = pageSize;
-                this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:this.gridPage})
-                // let data = [
-                //     { id: 10011, name: 'Test11', nickname: 'T11', role: 'Develop', sex: '00900', age: '80',birthday:'2021-02-11', address: 'Shenzhen' },
-                //     { id: 10012, name: 'Test12', nickname: 'T12', role: 'Designer', sex: '00901', age: '90',birthday:'2021-02-10', address: 'Shenzhen' },
-                //     { id: 10013, name: 'Test13', nickname: 'T13', role: 'Test', sex: '00900', age: '5',birthday:'2021-02-21', address: 'Shenzhen' },
-                //     { id: 10014, name: 'Test14', nickname: 'T14', role: 'Develop', sex: '00900', age: '80',birthday:'2021-02-11', address: 'Shenzhen' },
-                // ];
-                // this.$set(this,"data",data);
-
+                // this.getData()
+                let data = [
+                    { id: 10011, name: 'Test11', nickname: 'T11', role: 'Develop', sex: '00900', age: '80',birthday:'2021-02-11', address: 'Shenzhen' },
+                    { id: 10012, name: 'Test12', nickname: 'T12', role: 'Designer', sex: '00901', age: '90',birthday:'2021-02-10', address: 'Shenzhen' },
+                    { id: 10013, name: 'Test13', nickname: 'T13', role: 'Test', sex: '00900', age: '5',birthday:'2021-02-21', address: 'Shenzhen' },
+                    { id: 10014, name: 'Test14', nickname: 'T14', role: 'Develop', sex: '00900', age: '80',birthday:'2021-02-11', address: 'Shenzhen' },
+                ];
+                this.$set(this.gridOptions,"data",data);
             },
             // 编辑触发
             editRowEvent (row) {
@@ -757,9 +691,9 @@
             },
             saveRowEvent () {
                 this.$refs.filterTable.clearActived().then(() => {
-                    this.gridLoading = true
+                    this.gridOptions.loading = true
                     setTimeout(() => {
-                        this.gridLoading = false
+                        this.gridOptions.loading = false
                         this.$XModal.message({ message: '保存成功！', status: 'success' })
                     }, 300)
                 })
@@ -775,12 +709,12 @@
             },
             // 动态显示列头
             openTreeTransfer(){
-                this.transferDialogVisible = true;
+                this.dialogVisible = true;
                 this.fromDataTemp = JSON.stringify(this.fromData);
                 this.toDataTemp =  JSON.stringify(this.toData);
             },
             cancleTreeTransfer(){
-                this.transferDialogVisible = false;
+                this.dialogVisible = false;
                 this.fromData = JSON.parse(this.fromDataTemp);
                 this.toData = JSON.parse(this.toDataTemp);
                 this.addObj = null;
@@ -789,7 +723,7 @@
                 this.toDataTemp = "";
             },
             closeTreeTransfer(){
-                this.transferDialogVisible = false;
+                this.dialogVisible = false;
                 if(this.toDataTemp != JSON.stringify(this.toData)){
                     this.fromDataTemp = "";
                     this.toDataTemp = "";
@@ -846,6 +780,97 @@
                 console.log("obj:", obj);
                 this.removeObj = obj;
 
+            },
+            changeColumn(type){
+                let column;
+                if(type == 'only'){
+                    // 单表头
+                    column = [
+                        { type: 'seq', width: 50, title:'序号',disabled: true,fixed:"left" },
+                        { field: 'name',id:"name",prentField:0,width: 400, title: 'name',align:"right",filter:true,filterType:"input",sortable:true,fixed:"left",editRender: { name: '$input' },params:{
+                                filterWay:'str',
+                                filterWayValue:'contains'
+                            } },
+                        { field: 'sex',id:"sex",prentField:0,width: 400, title: 'sex',filter:true,filterType:"select", slots: {
+                                default:"trans_default",
+                            },sortable:true,editRender: { name: '$select',options:this.genderArr}},
+                        { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal'} },
+                        { field: 'birthday',id:"birthday",prentField:0,width: 400, title: 'birthday',filter:true,filterType:"date", showOverflow: true,sortable:true, params:{
+                                filterWay:'date',
+                                filterWayValue:'date'
+                            }},
+                        { field: 'address',id:"address",prentField:0,width: 400, title: 'Address', showOverflow: true,filter:true,filterType:"select_mult",sortable:true },
+                        { field: 'role',id:"role",prentField:0,width: 400, title: 'role',sortable:true,visible:false},
+                        { title: '操作',id:"operate",prentField:0, width: 200,disabled: true,slots: { default: 'operate' },fixed:"right" }
+                    ];
+                }else{
+                    // 多表头
+                    column = [
+                        { type: 'seq', width: 50, title:'序号',disabled: true,fixed:"left" },
+                        {
+                            field: 'name',
+                            width: 400,
+                            id:'name',
+                            prentField:0,
+                            title: 'name',
+                            align: "right",
+                            filter: true,
+                            filterType: "input",
+                            sortable: true,
+                            fixed: "left",
+                            params:{
+                                filterWay:'str',
+                                filterWayValue:'contains'
+                            }
+                        },
+                        { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal'} },
+                        {
+                            id:'base',
+                            prentField:0,
+                            title: '基本信息',
+                            children: [
+                                {
+                                    field: 'sex', width: 400,id:'sex',
+                                    prentField:"base", title: 'sex', filter: true, filterType: "select", slots: {
+                                        default: "trans_default",
+                                    }, sortable: true
+                                },
+                                {
+                                    field: 'birthday',
+                                    width: 400,
+                                    id:'birthday',
+                                    prentField:"base",
+                                    title: 'birthday',
+                                    filter:true,
+                                    filterType:"date",
+                                    showOverflow: true,
+                                    sortable: true,
+                                    params:{
+                                        filterWay:'date',
+                                        filterWayValue:'date'
+                                    }
+                                },
+                            ]
+                        },
+                        { field: 'address',width: 400, id:'address',
+                            prentField:0,title: 'Address', showOverflow: true,filter:true,filterType:"select_mult",sortable:true },
+                        { field: 'role',width: 400, id:'role',
+                            prentField:0,title: 'role',sortable:true,visible:false},
+                        { title: '操作', width: 200,disabled: true,id:'operate',
+                            prentField:0, slots: { default: 'operate' },fixed:"right" }
+                    ];
+                }
+
+                this.$set(this.gridOptions,"columns",column);
+                this.getColumn();
+                // 显示列头情况
+                if(this.gridOptions.toolbarConfig&&this.gridOptions.toolbarConfig.slots&&this.gridOptions.toolbarConfig.slots.tools&&this.gridOptions.toolbarConfig.slots.tools == "display_columns"){
+                    console.log("column",column)
+                    this.toData = this.formatTransferShow(JSON.parse(JSON.stringify(column)));
+                    console.log("column",this.fromData)
+                    this.fromData = this.formatTransferHide(JSON.parse(JSON.stringify(column)));
+                    console.log("column",this.toData)
+                }
             },
             // 打印
             printEvent(){
@@ -1015,9 +1040,6 @@
         left: 0;
         right: 0;
         bottom: 0;
-    }
-    .v-contextmenu .v-contextmenu-item.v-contextmenu-item--disabled{
-        background: #ffffff;
     }
 </style>
 

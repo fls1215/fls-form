@@ -1,6 +1,6 @@
 import Vue from "vue"
 import VueRouter from "vue-router"
-import table from "../components/f-table/grid.vue"
+import table from "../components/f-table/demo.vue"
 
 Vue.use(VueRouter)
 
