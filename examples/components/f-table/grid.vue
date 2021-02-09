@@ -1,7 +1,8 @@
 <template>
     <div class="table filter">
         <p>列头右键快捷菜单</p>
-        筛选条件：{{filtersData}}
+        <!--{{filtersData}}-->
+        <!--{{columns}}-->
         <vxe-grid
             class="grid"
             v-bind="$attrs"
@@ -50,7 +51,7 @@
                     <div class="filterBox">
                         <!--输入的筛选类型-->
                         <div class="types">
-                            <div class="filterIcon" v-if="column.params.filterWayValue == 'equal'">=</div>
+                            <div class="filterIcon" v-if="!column.params.filterWayValue || column.params.filterWayValue == 'equal'">=</div>
                             <div class="filterIcon" v-if="column.params.filterWayValue == 'startswith'">
                                 <span class="sel">ab</span>c
                             </div>
@@ -63,7 +64,7 @@
                             <div class="filterIcon" v-if="column.params.filterWayValue == 'between'"> |-| </div>
                             <div class="filterIcon" v-if="column.params.filterWayValue == 'notequal'"> ≠ </div>
                             <div class="filterTypes">
-                                <el-select v-model="column.params.filterWayValue" placeholder="请选择" v-if="column.params.filterWay == 'str'" @change="clearFilter(column.property)">
+                                <el-select v-model="column.params.filterWayValue" v-if="column.params.filterWay == 'str'" @change="clearFilter(column.property)">
                                     <el-option
                                             v-for="item in strTypeoptions"
                                             :key="item.value"
@@ -71,7 +72,7 @@
                                             :value="item.value">
                                     </el-option>
                                 </el-select>
-                                <el-select v-model="column.params.filterWayValue" placeholder="请选择" v-if="column.params.filterWay == 'num'" @change="clearFilter(column.property)">
+                                <el-select v-model="column.params.filterWayValue" v-if="column.params.filterWay == 'num'" @change="clearFilter(column.property)">
                                     <el-option
                                             v-for="item in numTypeoptions"
                                             :key="item.value"
@@ -83,11 +84,11 @@
                         </div>
 
                         <div class="filterContent" v-if="column.params.filterWayValue == 'between'">
-                            <el-input  class="filterOther" placeholder="搜索" size="mini" clearable :style="{textAlign:column.align}" v-model="lessElements[column.property]" @change="lessChange($event,column.property)"></el-input>
-                          —  <el-input class="filterOther" placeholder="搜索" size="mini" clearable :style="{textAlign:column.align}" v-model="greatElements[column.property]" @change="greatChange($event,column.property)"></el-input>
+                            <el-input  class="filterOther" :placeholder="column.params.filterWayPhold || '请输入'" size="mini" clearable :style="{textAlign:column.align}" v-model="lessElements[column.property]" @change="lessChange($event,column.property)"></el-input>
+                          —  <el-input class="filterOther" :placeholder="column.params.filterWayPhold || '请输入'" size="mini" clearable :style="{textAlign:column.align}" v-model="greatElements[column.property]" @change="greatChange($event,column.property)"></el-input>
                         </div>
                         <div class="filterContent" v-else>
-                            <el-input placeholder="搜索1" size="mini" clearable :style="{textAlign:column.align}" v-model="filterElements[column.property]" @change="inputFilterChange($event,column.property)"></el-input>
+                            <el-input :placeholder="column.params.filterWayPhold || '请输入'" size="mini" clearable :style="{textAlign:column.align}" v-model="filterElements[column.property]" @change="inputFilterChange($event,column.property)"></el-input>
                         </div>
                     </div>
                 </div>
@@ -102,39 +103,48 @@
                         </span>
                     </p>
                     <div class="filterBox">
-                        <el-select
-                                v-model="filterElements[column.property]"
-                                clearable
-                                @change="selectFilterChange($event,column.property)"
-                        >
-                            <el-option
-                                    v-for="item in genderArr" :key="item.value" :value="item.value" :label="item.label">
-                            </el-option>
-                        </el-select>
-                    </div>
-                </div>
-            </template>
-            <!--多选下拉-->
-            <template v-slot:select_multiple="{ column }">
-                <div class="slotBox">
-                    <p class="titleBox" v-contextmenu:contextmenu @click.stop="sortChange(column)">{{column.title}}
-                        <span v-if="column.sortable" class="custom-sort" :class="{'is-order': column.order}">
-                            <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
-                            <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
-                        </span>
-                    </p>
-                    <div class="filterBox">
-                        <el-select
-                                v-model="filterElements[column.property]"
-                                clearable
-                                multiple
-                                collapse-tags
-                                @change="multSelectFilterChange($event,column.property)"
-                        >
-                            <el-option
-                                    v-for="item in addrArr" :key="item.value" :value="item.value" :label="item.label">
-                            </el-option>
-                        </el-select>
+                        <div class="types">
+                            <div class="filterIcon" v-if="!column.params.filterWayValue || column.params.filterWayValue == 'equal'">=</div>
+                            <div class="filterIcon" v-if="column.params.filterWayValue == 'multiple'">&</div>
+                            <div class="filterTypes">
+                                <el-select v-model="column.params.filterWayValue"  @change="clearFilter(column.property)">
+                                    <el-option
+                                            v-for="item in selectTypeoptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                        <div class="filterContent">
+                            <el-select
+                                    v-if="!column.params.filterWayValue || column.params.filterWayValue == 'equal'"
+                                    v-model="filterElements[column.property]"
+                                    clearable
+                                    @change="selectFilterChange($event,column.property,column.params.list)"
+                                    :key="column.params + 1"
+                                    :placeholder="column.params.filterWayPhold || '请选择'"
+                            >
+                                <el-option
+                                        v-for="item in dicts[column.params.list]" :key="item.value" :value="item.value" :label="item.label">
+                                </el-option>
+                            </el-select>
+                            <el-select
+                                    v-if="column.params.filterWayValue == 'multiple'"
+                                    v-model="filterElements[column.property]"
+                                    clearable
+                                    multiple
+                                    collapse-tags
+                                    @change="multSelectFilterChange($event,column.property,column.params.list)"
+                                    :key="column.params + 2"
+                                    :placeholder="column.params.filterWayPhold || '请选择'"
+                            >
+                                <el-option
+                                        v-for="item in dicts[column.params.list]" :key="item.value" :value="item.value" :label="item.label">
+                                </el-option>
+                            </el-select>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -153,11 +163,11 @@
                             <div class="filterIcon" v-if="column.params.filterWayValue == 'year'">Y</div>
                             <div class="filterIcon" v-if="column.params.filterWayValue == 'month'">M</div>
                             <div class="filterIcon" v-if="column.params.filterWayValue == 'monthrange'">M-M</div>
-                            <div class="filterIcon" v-if="column.params.filterWayValue == 'date'">D</div>
+                            <div class="filterIcon" v-if="!column.params.filterWayValue || column.params.filterWayValue == 'date'">D</div>
                             <div class="filterIcon" v-if="column.params.filterWayValue == 'dates'">&</div>
                             <div class="filterIcon" v-if="column.params.filterWayValue == 'daterange'">D-D</div>
                             <div class="filterTypes">
-                                <el-select v-model="column.params.filterWayValue" placeholder="请选择" v-if="column.params.filterWay == 'date'" @change="clearFilter(column.property)">
+                                <el-select v-model="column.params.filterWayValue" v-if="column.params.filterWay == 'date'" @change="clearFilter(column.property)">
                                     <el-option
                                             v-for="item in dateTypeoptions"
                                             :key="item.value"
@@ -172,13 +182,14 @@
                                     v-if="column.params.filterWayValue == 'year'
                                      || column.params.filterWayValue == 'month'
                                      || column.params.filterWayValue == 'date'
-                                     || column.params.filterWayValue == 'dates'"
+                                     || column.params.filterWayValue == 'dates'
+                                     ||!column.params.filterWayValue"
                                     v-model="filterElements[column.property]"
                                     clearable
                                     :format="dateFormat[column.params.filterWayValue]"
                                     :value-format="dateFormat[column.params.filterWayValue]"
-                                    :type="column.params.filterWayValue"
-                                    placeholder="选择日期"
+                                    :type="column.params.filterWayValue || 'date'"
+                                    :placeholder="column.params.filterWayPhold || '请选择'"
                                     @change="inputFilterChange($event,column.property)"
                                     :key="column.params + 1"
                             >
@@ -214,8 +225,8 @@
             </template>
 
             <!--翻译-->
-            <template v-slot:trans_default="{ row }">
-                {{row.sex | filtersArr}}
+            <template v-slot:trans_default="{ column, row }">
+                {{row.sex | filtersArr(column.params.list)}}
             </template>
 
             <!--操作列-->
@@ -256,6 +267,7 @@
 
 <script>
     import treeTransfer from 'el-tree-transfer' // 引入
+    import {mapState} from "vuex"
     let that;
     export default {
         components:{ treeTransfer }, // 注册
@@ -288,15 +300,6 @@
                 filtersData:{},//筛选的方式
                 lessElements:[],//分段的筛选，最小值
                 greatElements:[],//分段的筛选，最大值
-                genderArr:[
-                    {value:"00900",label:"Man"},
-                    {value:"00901",label:"Women"},
-                ],
-                addrArr:[
-                    {value:"Shenzhen",label:"Shenzhen"},
-                    {value:"Guangzhou",label:"Guangzhou"},
-                    {value:"Shanghai",label:"Shanghai"},
-                ],
                 // 解决多维数据的参数获取问题
                 // 筛选方法
                 // 字符串筛选 filterWay:str;filterWayValue:contains(默认为包含)
@@ -329,6 +332,14 @@
                 },{
                     value: 'notequal',
                     label: '不等于'
+                }],
+                //下拉筛选 filterWay:select;filterWayValue:equal/multiple
+                selectTypeoptions:[ {
+                    value: 'equal',
+                    label: '等于'
+                }, {
+                    value: 'multiple',
+                    label: '多选'
                 }],
                 //时间筛选 filterWay:date;filterWayValue:date(默认为年月日)
                 dateTypeoptions:[ {
@@ -432,10 +443,15 @@
                 }
             },
         },
+        computed:{
+            ...mapState({
+                dicts: (state) => state.dicts
+            })
+        },
         watch:{
             tableColumns:{
                 handler(newVal, oldVal) {
-                    this.columns = this.tableColumns;
+                    this.columns = JSON.parse(JSON.stringify(this.tableColumns));
                     this.getColumn();
                     console.log("tableColumns",this.tableColumns)
                 },
@@ -456,8 +472,8 @@
             })
         },
         filters: {
-            filtersArr: function (value) {
-                let data = that.genderArr.find(item =>{
+            filtersArr: function (value,list) {
+                let data = that.dicts[list].find(item =>{
                     return item.value == value
                 })
                 return data.label
@@ -472,6 +488,8 @@
         methods:{
             getColumn(){
                 this.formatColumn(this.columns);
+                debugger
+                console.log("后",this.columns)
                 // 显示列头情况
                 if(this.toolbarConfig&&this.toolbarConfig.slots&&this.toolbarConfig.slots.tools&&this.toolbarConfig.slots.tools == "display_columns"){
                     console.log("column",this.columns)
@@ -482,6 +500,8 @@
                 }
             },
             formatColumn(columns){
+                console.log("前",columns)
+
                 // 在不赋值的情况下，空对象下的属性可以响应。如果需要对筛选回显，需要$set或者将filterElements的值循环赋上
                 // let filterElements = {};
                 // 获取表格数据，给筛选框加值
@@ -500,9 +520,6 @@
                                 case "select":
                                     item.slots.header = "select_default";
                                     break;
-                                case "select_mult":
-                                    item.slots.header = "select_multiple";
-                                    break;
                                 case "date":
                                     item.slots.header = "date_default";
                                     break;
@@ -519,8 +536,16 @@
                             item.slots?item.slots:item.slots={};
                             item.slots.header = "no_filter";
                         }
+                        // 编辑情况
+                        if(item.editRender){
+                            if(item.editRender.options){
+                                item.editRender.options = this.dicts[item.editRender.options];
+                                console.log("item",item.editRender.options)
+                            }
+                        }
                     }
                 })
+
                 // this.filterElements={...filterElements}
             },
             formatTransferShow(columns){
@@ -546,6 +571,24 @@
 
                     if((item.visible === undefined || item.visible === true) &&(!item.children || item.children.length == 0)  ){
                         columns.splice(i,1);
+                    }
+                }
+                return columns;
+            },
+            updateColumns(columns,showColumns){
+                // 设置columns
+                for (var i = columns.length - 1; i >= 0; i--) {
+                    let item = columns[i];
+                    if(item.children){
+                        this.updateColumns(item.children,showColumns);
+                    }else{
+                        if(item.field){
+                            if( showColumns.indexOf(item.field) > -1 ){
+                                item.visible = true;
+                            }else{
+                                item.visible = false;
+                            }
+                        }
                     }
                 }
                 return columns;
@@ -611,7 +654,11 @@
                     if(this.filterElements[key] && this.filterElements[key].length != 0){
                         filtersData[key] = {};
                         filtersData[key].value = this.filterElements[key];
-                        filtersData[key].type = column.params?column.params.filterWayValue:'';
+                        if(column.params.filterWay == 'str' || column.params.filterWay == 'num' || column.params.filterWay == 'select'){
+                            filtersData[key].type = column.params.filterWayValue || 'equal'
+                        }else if(column.params.filterWay == 'date'){
+                            filtersData[key].type = column.params.filterWayValue || 'date'
+                        }
                     }
                 }
                 this.filtersData = filtersData;
@@ -685,7 +732,7 @@
                     column.filters = undefined;
             },
             // 下拉会触发
-            selectFilterChange(v,field){
+            selectFilterChange(v,field,list){
                 const xTable = this.$refs.filterTable;
                 const column = xTable.getColumnByField(field);
 
@@ -693,7 +740,7 @@
                     column.filters = [{}];
                 }
                 let data = [];
-                that.genderArr.map(item =>{
+                that.dicts[list].map(item =>{
                     if(item.value == v){
                         item.checked = true
                     }else{
@@ -705,7 +752,7 @@
                 this.joinFilter();
             },
             // 多选下拉会触发
-            multSelectFilterChange(v,field){
+            multSelectFilterChange(v,field,list){
                 const xTable = this.$refs.filterTable;
                 const column = xTable.getColumnByField(field);
 
@@ -713,7 +760,7 @@
                     column.filters = [{}];
                 }
                 let data = [];
-                that.addrArr.map(item =>{
+                that.dicts[list].map(item =>{
                     if(v.indexOf(item.value) > -1){
                         item.checked = true
                     }else{
@@ -815,18 +862,30 @@
                         }
                     }
                     xTable.refreshColumn();
+                    // debugger
+                    // 如果field在visibleColumn里，设置false.否则设置true.
+                    let show = [];
+                    let showColumn = xTable.getTableColumn().visibleColumn;
+                    for(let i = 0; i < showColumn.length;i++){
+                        if(showColumn[i].property){
+                            show.push(showColumn[i].property);
+                        }
+                    }
+                    let columns = this.updateColumns(this.columns,show);
+
+                    this.$emit("updateColumn",columns);
                 }
                 this.addObj = null;
                 this.removeObj = null;
             },
             // 切换模式 现有树形穿梭框模式transfer 和通讯录模式addressList
-            changeMode() {
-                if (this.mode == "transfer") {
-                    this.mode = "addressList";
-                } else {
-                    this.mode = "transfer";
-                }
-            },
+            // changeMode() {
+            //     if (this.mode == "transfer") {
+            //         this.mode = "addressList";
+            //     } else {
+            //         this.mode = "transfer";
+            //     }
+            // },
             // 监听穿梭框组件添加
             add(fromData,toData,obj){
                 // 树形穿梭框模式transfer时，返回参数为左侧树移动后数据、右侧树移动后数据、移动的{keys,nodes,halfKeys,halfNodes}对象

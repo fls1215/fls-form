@@ -9,6 +9,7 @@
             :tableColumns.sync="tableColumns"
             :tableDatas.sync="tableDatas"
             @tableRefresh="tableRefresh"
+            @updateColumn="updateColumn"
         ></filter-table>
     </div>
 </template>
@@ -36,79 +37,99 @@
             getColumn(){
                 let column;
                 // 单表头
+            //     column = [
+            //         { type: 'seq', width: 50, title:'序号',disabled: true,fixed:"left" },
+            //         { field: 'name',id:"name",prentField:0,width: 400, title: 'name',align:"right",filter:true,filterType:"input",sortable:true,fixed:"left",editRender: { name: '$input' },params:{
+            //                 filterWay:'str',
+            //                 filterWayValue:'contains',
+            //                 filterWayPhold:'请输入姓名'
+            //             } },
+            //         { field: 'sex',id:"sex",prentField:0,width: 400, title: 'sex',filter:true,filterType:"select", slots: {
+            //                 default:"trans_default",
+            //             },sortable:true,editRender: { name: '$select',options:this.genderArr}},
+            //         { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal',filterWayPhold:'请输入年龄'} },
+            //         { field: 'birthday',id:"birthday",prentField:0,width: 400, title: 'birthday',filter:true,filterType:"date", showOverflow: true,sortable:true, params:{
+            //                 filterWay:'date',
+            //                 filterWayValue:'date',
+            //                 filterWayPhold:'请选择'
+            //             }},
+            //         { field: 'address',id:"address",prentField:0,width: 400, title: 'Address', showOverflow: true,filter:true,filterType:"select",sortable:true,params:{
+            //     filterWay:'select',
+            //         filterWayValue:'equal',
+            //         filterWayPhold:'请选择地区'
+            // } },
+            //         { field: 'role',id:"role",prentField:0,width: 400, title: 'role',sortable:true,visible:false},
+            //         { title: '操作',id:"operate",prentField:0, width: 200,disabled: true,slots: { default: 'operate' },fixed:"right" }
+            //     ];
+                // 多表头
                 column = [
                     { type: 'seq', width: 50, title:'序号',disabled: true,fixed:"left" },
-                    { field: 'name',id:"name",prentField:0,width: 400, title: 'name',align:"right",filter:true,filterType:"input",sortable:true,fixed:"left",editRender: { name: '$input' },params:{
+                    {
+                        field: 'name',
+                        width: 400,
+                        id:'name',
+                        prentField:0,
+                        title: 'name',
+                        align: "right",
+                        filter: true,
+                        filterType: "input",
+                        sortable: true,
+                        fixed: "left",
+                        params:{
                             filterWay:'str',
-                            filterWayValue:'contains'
+                            filterWayValue:'contains',
+                            filterWayPhold:'请输入姓名'
+                        }
+                    },
+                    { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal',filterWayPhold:'请输入年龄'} },
+                    {
+                        id:'base',
+                        prentField:0,
+                        title: '基本信息',
+                        children: [
+                            {
+                                field: 'sex', width: 400,id:'sex',
+                                prentField:"base", title: 'sex', filter: true, filterType: "select", slots: {
+                                    default: "trans_default",
+                                }, sortable: true,
+                                editRender: { name: '$select',options:"genderArr"},
+                                params:{
+                                    filterWay:'select',
+                                    filterWayValue:'equal',
+                                    filterWayPhold:'请选择性别',
+                                    list:"genderArr"
+                                }
+                            },
+                            {
+                                field: 'birthday',
+                                width: 400,
+                                id:'birthday',
+                                prentField:"base",
+                                title: 'birthday',
+                                filter:true,
+                                filterType:"date",
+                                showOverflow: true,
+                                sortable: true,
+                                params:{
+                                    filterWay:'date',
+                                    filterWayValue:'date',
+                                    filterWayPhold:'请选择日期'
+                                }
+                            },
+                        ]
+                    },
+                    { field: 'address',width: 400, id:'address',
+                        prentField:0,title: 'Address', showOverflow: true,filter:true,filterType:"select",sortable:true, params:{
+                            filterWay:'select',
+                            filterWayValue:'equal',
+                            filterWayPhold:'请选择地区',
+                            list:"addrArr"
                         } },
-                    { field: 'sex',id:"sex",prentField:0,width: 400, title: 'sex',filter:true,filterType:"select", slots: {
-                            default:"trans_default",
-                        },sortable:true,editRender: { name: '$select',options:this.genderArr}},
-                    { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal'} },
-                    { field: 'birthday',id:"birthday",prentField:0,width: 400, title: 'birthday',filter:true,filterType:"date", showOverflow: true,sortable:true, params:{
-                            filterWay:'date',
-                            filterWayValue:'date'
-                        }},
-                    { field: 'address',id:"address",prentField:0,width: 400, title: 'Address', showOverflow: true,filter:true,filterType:"select_mult",sortable:true },
-                    { field: 'role',id:"role",prentField:0,width: 400, title: 'role',sortable:true,visible:false},
-                    { title: '操作',id:"operate",prentField:0, width: 200,disabled: true,slots: { default: 'operate' },fixed:"right" }
+                    { field: 'role',width: 400, id:'role',
+                        prentField:0,title: 'role',sortable:true,visible:false},
+                    { title: '操作', width: 200,disabled: true,
+                        prentField:0, slots: { default: 'operate' },fixed:"right" }
                 ];
-                // // 多表头
-                // column = [
-                //     { type: 'seq', width: 50, title:'序号',disabled: true,fixed:"left" },
-                //     {
-                //         field: 'name',
-                //         width: 400,
-                //         id:'name',
-                //         prentField:0,
-                //         title: 'name',
-                //         align: "right",
-                //         filter: true,
-                //         filterType: "input",
-                //         sortable: true,
-                //         fixed: "left",
-                //         params:{
-                //             filterWay:'str',
-                //             filterWayValue:'contains'
-                //         }
-                //     },
-                //     { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal'} },
-                //     {
-                //         id:'base',
-                //         prentField:0,
-                //         title: '基本信息',
-                //         children: [
-                //             {
-                //                 field: 'sex', width: 400,id:'sex',
-                //                 prentField:"base", title: 'sex', filter: true, filterType: "select", slots: {
-                //                     default: "trans_default",
-                //                 }, sortable: true
-                //             },
-                //             {
-                //                 field: 'birthday',
-                //                 width: 400,
-                //                 id:'birthday',
-                //                 prentField:"base",
-                //                 title: 'birthday',
-                //                 filter:true,
-                //                 filterType:"date",
-                //                 showOverflow: true,
-                //                 sortable: true,
-                //                 params:{
-                //                     filterWay:'date',
-                //                     filterWayValue:'date'
-                //                 }
-                //             },
-                //         ]
-                //     },
-                //     { field: 'address',width: 400, id:'address',
-                //         prentField:0,title: 'Address', showOverflow: true,filter:true,filterType:"select_mult",sortable:true },
-                //     { field: 'role',width: 400, id:'role',
-                //         prentField:0,title: 'role',sortable:true,visible:false},
-                //     { title: '操作', width: 200,disabled: true,id:'operate',
-                //         prentField:0, slots: { default: 'operate' },fixed:"right" }
-                // ];
                 setTimeout(() => {
                     this.$set(this,"tableColumns",column);
                     this.demoLoading = false;
@@ -136,6 +157,7 @@
             //获取请求筛选数据
             tableRefresh(filter,page){
                 const that= this;
+                this.filtersData = filter;
                 console.log(filter,page)
                 // 模拟请求数据
                 var list = []
@@ -154,6 +176,10 @@
                 setTimeout(() => {
                     that.$set(this,"tableDatas",list);
                 },500)
+            },
+            updateColumn(columns){
+                console.log(columns);
+                debugger
             }
         }
     }
