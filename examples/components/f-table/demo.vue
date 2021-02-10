@@ -1,7 +1,7 @@
 <template>
     <div>
        <p> 封装表格使用示例 </p>
-        {{filtersData}}
+        筛选查询条件：{{filtersData}}
         <filter-table
                 class="demo"
                 ref="demoTable"
@@ -10,7 +10,15 @@
             :tableDatas.sync="tableDatas"
             @tableRefresh="tableRefresh"
             @updateColumn="updateColumn"
-        ></filter-table>
+        >
+            <!--自定义列-->
+            <template  v-slot:role="{row}">
+                <el-button size="mini">保存</el-button>
+            </template >
+            <template  v-slot:age="{row}">
+                我是自定义列
+            </template >
+        </filter-table>
     </div>
 </template>
 
@@ -81,7 +89,7 @@
                             filterWayPhold:'请输入姓名'
                         }
                     },
-                    { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal',filterWayPhold:'请输入年龄'} },
+                    { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal',filterWayPhold:'请输入年龄',slot:"age"} },
                     {
                         id:'base',
                         prentField:0,
@@ -126,7 +134,7 @@
                             list:"addrArr"
                         } },
                     { field: 'role',width: 400, id:'role',
-                        prentField:0,title: 'role',sortable:true,visible:false},
+                        prentField:0,title: 'role',sortable:true,visible:false,params:{slot:"role"}},
                     { title: '操作', width: 200,disabled: true,
                         prentField:0, slots: { default: 'operate' },fixed:"right" }
                 ];
@@ -189,4 +197,7 @@
 .demo{
     height:calc(100% - 100px)
 }
+    .tips{
+
+    }
 </style>

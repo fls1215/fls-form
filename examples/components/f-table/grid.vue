@@ -1,6 +1,7 @@
 <template>
     <div class="table filter">
         <p>列头右键快捷菜单</p>
+
         <!--{{filtersData}}-->
         <!--{{columns}}-->
         <vxe-grid
@@ -226,7 +227,7 @@
 
             <!--翻译-->
             <template v-slot:trans_default="{ column, row }">
-                {{row.sex | filtersArr(column.params.list)}}
+                {{row[column.property] | filtersArr(column.params.list)}}
             </template>
 
             <!--操作列-->
@@ -236,6 +237,21 @@
                     <span @click="editRowEvent(row)" v-else>编 辑</span>
                     <span @click="removeRowEvent(row)">删 除</span>
                 </div>
+            </template>
+
+            <!--自定义列-->
+                <template v-slot:custom="{ column,row }">
+                    <slot :name="column.params.slot">
+                    </slot>
+                </template>
+
+            <template v-slot:empty>
+              <span>
+                <svg class="icon icon-kong" aria-hidden="true">
+                      <use xlink:href="#icon-kong"></use>
+                    </svg>
+                <p class="noData">暂无数据</p>
+              </span>
             </template>
         </vxe-grid>
         <!--右键弹出框-->
@@ -488,8 +504,7 @@
         methods:{
             getColumn(){
                 this.formatColumn(this.columns);
-                debugger
-                console.log("后",this.columns)
+
                 // 显示列头情况
                 if(this.toolbarConfig&&this.toolbarConfig.slots&&this.toolbarConfig.slots.tools&&this.toolbarConfig.slots.tools == "display_columns"){
                     console.log("column",this.columns)
@@ -500,7 +515,6 @@
                 }
             },
             formatColumn(columns){
-                console.log("前",columns)
 
                 // 在不赋值的情况下，空对象下的属性可以响应。如果需要对筛选回显，需要$set或者将filterElements的值循环赋上
                 // let filterElements = {};
@@ -509,6 +523,12 @@
                     if(item.children){
                         this.formatColumn(item.children)
                     }else{
+                        //如果有自定义列，将其slots.default 设置为custom，并将外部插槽的名字（为方便取数据，自定义的参数为外部插槽的名字）传入内部slot
+                        if(item.params&&item.params.slot){
+                            item.slots?item.slots:item.slots={};
+                            item.slots.default = "custom"
+                        }
+
                         // 筛选情况
                         if(item.filter){
                             // 如果写了filter为true,但没给我传filterType,默认filter为false。
