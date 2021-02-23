@@ -165,7 +165,7 @@ lists:[
                         rows:2
                     },
                 ],
- ###表单数据例子
+### 表单数据例子
  formData:{
                     input1:"5",
                     input2:null,
@@ -181,7 +181,7 @@ lists:[
                     input41:[],
                 },
                 
-
+[![ybTkM4.png](https://s3.ax1x.com/2021/02/23/ybTkM4.png)](https://imgchr.com/i/ybTkM4)
 
 | type | 类别     | 类型                       |
 | ---- | -------- | -------------------------- |
