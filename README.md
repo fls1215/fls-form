@@ -20,7 +20,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 # 动态表单
 ## 二次封装Element的form
-## 包含输入框、选择框、单选框、复选框、文本域和上传。封装了两位小数框、密码框、邮件框、身份证框和电话框，内置校验。
+### 包含输入框、选择框、单选框、复选框、文本域和上传。封装了两位小数框、密码框、邮件框、身份证框和电话框，内置校验。
 [![ybTkM4.png](https://s3.ax1x.com/2021/02/23/ybTkM4.png)](https://imgchr.com/i/ybTkM4)
 
 | type | 类别     | 类型                       |
