@@ -1,19 +1,19 @@
 import Vue from "vue"
 import VueRouter from "vue-router"
-import rich from "../components/f-richtext/richText2.vue"
+import form from "../components/f-form/dynamicForm.vue"
 
 Vue.use(VueRouter)
 
 const routes = [
     {
         path:"/",
-        name:"rich",
-        component:rich
+        name:"form",
+        component:form
     },
     {
-        path:"/form",
-        name:'form',
-        component:()=> import(/* webpackChunkName:"form"*/'../components/f-form/dynamicForm.vue')
+        path:"/rich",
+        name:'rich',
+        component:()=> import(/* webpackChunkName:"form"*/'../components/f-richtext/richtext.vue')
     },
     {
         path:"/table",
