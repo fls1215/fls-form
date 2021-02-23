@@ -236,3 +236,4 @@ lists:[
 | 方法     | updateColumn | 表头更新方法 |
 
 [![ybTrLj.png](https://s3.ax1x.com/2021/02/23/ybTrLj.png)](https://imgchr.com/i/ybTrLj)
+[![ybLYP1.gif](https://s3.ax1x.com/2021/02/23/ybLYP1.gif)](https://imgchr.com/i/ybLYP1)
