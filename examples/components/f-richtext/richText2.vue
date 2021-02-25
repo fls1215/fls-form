@@ -1,11 +1,11 @@
 <template>
     <div>
-        {{formulas}}
+        {{formula}}
+        <!--@click="contendEditClick"-->
+        <!--@keydown = "contenteditableKeyDown"-->
+        <!--@blur = "contendEditBlur"-->
         <div id="edit" class="richText" contenteditable="true" v-html="formulas"
              @keyup = "contenteditableKeyUp"
-             @keydown = "contenteditableKeyDown"
-             @blur = "contendEditBlur"
-             @click="contendEditClick"
         >
             <!-- 撒打算 <span class="keyWord" contenteditable="false" node="1">我的表单</span> &nbsp; -->
         </div>
@@ -57,25 +57,26 @@
             // 解析消息内容的字符串
             parseMessageDesc () {
                 let str = this.formula;
-                let result = ""
-                if (str.length > 0 && str.indexOf("[") < 0) { // 纯文本
-                    result = str
-                    return result
-                }
-                let subStr = ""
-                while (str.indexOf("[") >= 0) {
-                    let startIndex = str.indexOf("[")
-                    let endIndex = str.indexOf("]")
-                    if (str.indexOf("[") === 0) {
-                        let code = str.substring(startIndex + 1, endIndex)
-                        result += "&nbsp;<span class=\"keyWord\" node=\"" + code + "\">" + this.defaultDatas[code] + "</span>&nbsp;"
-                        str = str.substring(endIndex + 1)
-                    } else {
-                        subStr = str.substring(0, startIndex)
-                        result += subStr
-                        str = str.substring(startIndex)
-                    }
-                }
+                let result = "";
+                // if (str.length > 0 && str.indexOf("[") < 0) { // 纯文本
+                //     result = str
+                //     return result
+                // }
+                // let subStr = "";
+                // while (str.indexOf("[") >= 0) {
+                //     let startIndex = str.indexOf("[")
+                //     let endIndex = str.indexOf("]")
+                //     if (str.indexOf("[") === 0) {
+                //         let id = str.substring(startIndex + 1, endIndex)
+                //         result += "&nbsp;<span class=\"keyWord\" node=\"" + id + "\">" + this.defaultDatas[id] + "</span>&nbsp;"
+                //         str = str.substring(endIndex + 1)
+                //     } else {
+                //         subStr = str.substring(0, startIndex)
+                //         result += subStr
+                //         str = str.substring(startIndex)
+                //     }
+                // }
+                // debugger
                 return result + str
             },
             contenteditableKeyUp(e){
@@ -93,7 +94,7 @@
                     this.isfilter = true;
                     // this.lastBracket = selection.focusOffset;
                 }
-debugger
+
                 // 保存输入值
                 this.formula += e.key;
                 console.log(e)
@@ -109,21 +110,22 @@ debugger
             },
             // 点击事件
             contendEditClick(e){
-                let screenX;//鼠标位置x
-                let screenY;//鼠标位置y
-                let focusOffset;//鼠标定位index
-                // 获取选定对象
-                var selection = getSelection()
 
-                console.log("%c",'color:red',e)
-                console.log("%c",'color:red',selection)
-                console.log("%c",'color:red',lastEditRange);
-
-                screenX = e.screenX;
-                screenY = e.screenY;
-                // 设置最后光标对象
-                this.setLastEditRange();
-                focusOffset = selection.focusOffset;
+                // let screenX;//鼠标位置x
+                // let screenY;//鼠标位置y
+                // let focusOffset;//鼠标定位index
+                // // 获取选定对象
+                // var selection = getSelection()
+                //
+                // console.log("%c",'color:red',e)
+                // console.log("%c",'color:red',selection)
+                // console.log("%c",'color:red',lastEditRange);
+                //
+                // screenX = e.screenX;
+                // screenY = e.screenY;
+                // // 设置最后光标对象
+                // this.setLastEditRange();
+                // focusOffset = selection.focusOffset;
             },
             // 插入文本
             inputText(myValue){
@@ -134,7 +136,8 @@ debugger
                 let range = window.getSelection().getRangeAt(0);
                 let node = document.createTextNode(myValue);
                 range.insertNode(node);
-
+// 保存输入值
+                this.formula += e.key;
                 // 选取加入的内容
                 // selection.removeAllRanges()
                 // selection.addRange(lastEditRange);

@@ -4,9 +4,9 @@
       <!--<img alt="Vue logo" src="./assets/logo.png">-->
       <!--<demo></demo>-->
       <!--<HelloWorld msg="Welcome to Your Vue.js App"/>-->
-      <!--<router-link to="/">rich公式编辑器（正在开发）</router-link>|-->
-      <router-link to="/table">table</router-link>|
-      <router-link to="/">form</router-link>
+      <!--<router-link to="/rich">rich公式编辑器（正在开发）</router-link>|-->
+      <!--<router-link to="/table">table</router-link>|-->
+      <!--<router-link to="/">form</router-link>-->
     </div>
     <keep-alive>
       <router-view></router-view>

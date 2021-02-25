@@ -1,5 +1,6 @@
 <template>
-    <vxe-grid v-bind="gridOptions">
+    <vxe-grid v-bind="gridOptions"             @checkbox-all="selectAllEvent"
+              @checkbox-change="selectChangeEvent">
         <template v-slot:toolbar_buttons>
             <vxe-button @click="gridOptions.align = 'left'">居左</vxe-button>
             <vxe-button @click="gridOptions.align = 'center'">居中</vxe-button>
@@ -40,6 +41,7 @@
                     },
                     columns: [
                         { type: 'seq', width: 50 },
+                        { type: 'checkbox',  width: 50,fixed:"left" },
                         { field: 'name', title: 'name', slots: {
                                 header: 'input_default'
                             } },
@@ -62,6 +64,13 @@
             }
         },
         methods:{
+            selectAllEvent ({selection}) {
+                debugger
+                console.log(checked ? '所有勾选事件' : '所有取消事件', {selection}.length)
+            },
+            selectChangeEvent ({ checked, records }) {
+                console.log(checked ? '勾选事件' : '取消事件', records)
+            },
             // inputFilterChange(v,field){
             //     // let operator = "like";
             //     // let column = field;

@@ -2,6 +2,7 @@
     <div>
        <p> 封装表格使用示例 </p>
         筛选查询条件：{{filtersData}}
+        <vxe-button @click="getSelectEvent">获取选中</vxe-button>
         <filter-table
                 class="demo"
                 ref="demoTable"
@@ -10,7 +11,13 @@
             :tableDatas.sync="tableDatas"
             @tableRefresh="tableRefresh"
             @updateColumn="updateColumn"
+            @checkbox-all="selectAllEvent"
+            @checkbox-change="selectChangeEvent"
         >
+            <!--自定义按钮-->
+            <template  v-slot:toolbar>
+                <vxe-button @click="getSelectEvent">获取选中</vxe-button>
+            </template >
             <!--自定义列-->
             <template  v-slot:role="{row}">
                 <el-button size="mini">保存</el-button>
@@ -45,33 +52,70 @@
             getColumn(){
                 let column;
                 // 单表头
-            //     column = [
-            //         { type: 'seq', width: 50, title:'序号',disabled: true,fixed:"left" },
-            //         { field: 'name',id:"name",prentField:0,width: 400, title: 'name',align:"right",filter:true,filterType:"input",sortable:true,fixed:"left",editRender: { name: '$input' },params:{
-            //                 filterWay:'str',
-            //                 filterWayValue:'contains',
-            //                 filterWayPhold:'请输入姓名'
-            //             } },
-            //         { field: 'sex',id:"sex",prentField:0,width: 400, title: 'sex',filter:true,filterType:"select", slots: {
-            //                 default:"trans_default",
-            //             },sortable:true,editRender: { name: '$select',options:this.genderArr}},
-            //         { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal',filterWayPhold:'请输入年龄'} },
-            //         { field: 'birthday',id:"birthday",prentField:0,width: 400, title: 'birthday',filter:true,filterType:"date", showOverflow: true,sortable:true, params:{
-            //                 filterWay:'date',
-            //                 filterWayValue:'date',
-            //                 filterWayPhold:'请选择'
-            //             }},
-            //         { field: 'address',id:"address",prentField:0,width: 400, title: 'Address', showOverflow: true,filter:true,filterType:"select",sortable:true,params:{
-            //     filterWay:'select',
-            //         filterWayValue:'equal',
-            //         filterWayPhold:'请选择地区'
-            // } },
-            //         { field: 'role',id:"role",prentField:0,width: 400, title: 'role',sortable:true,visible:false},
-            //         { title: '操作',id:"operate",prentField:0, width: 200,disabled: true,slots: { default: 'operate' },fixed:"right" }
-            //     ];
+                // column = [
+                //     { type: 'seq', width: 50, title:'序号',fixed:"left" },
+                //     { type: 'checkbox',  width: 50,fixed:"left" },
+                //     {
+                //         field: 'name',
+                //         width: 400,
+                //         id:'name',
+                //         prentField:0,
+                //         title: 'name',
+                //         align: "right",
+                //         filter: true,
+                //         filterType: "input",
+                //         sortable: true,
+                //         fixed: "left",
+                //         params:{
+                //             filterWay:'str',
+                //             filterWayValue:'contains',
+                //             filterWayPhold:'请输入姓名'
+                //         }
+                //     },
+                //     { field: 'age',id:"age",prentField:0,width: 400, title: 'age',align:"right",filter:true,filterType:"input",sortable:true,editRender: { name: '$input' },params:{filterWay:'num',filterWayValue:'equal',filterWayPhold:'请输入年龄',slot:"age"} },
+                //     {
+                //         field: 'sex', width: 400,id:'sex',
+                //         prentField:"base", title: 'sex', filter: true, filterType: "select", slots: {
+                //             default: "trans_default",
+                //         }, sortable: true,
+                //         editRender: { name: '$select',options:"genderArr"},
+                //         params:{
+                //             filterWay:'select',
+                //             filterWayValue:'equal',
+                //             filterWayPhold:'请选择性别',
+                //             list:"genderArr"
+                //         }
+                //     },
+                //     {
+                //         field: 'birthday',
+                //         width: 400,
+                //         id:'birthday',
+                //         prentField:"base",
+                //         title: 'birthday',
+                //         filter:true,
+                //         filterType:"date",
+                //         showOverflow: true,
+                //         sortable: true,
+                //         params:{
+                //             filterWay:'date',
+                //             filterWayValue:'date',
+                //             filterWayPhold:'请选择日期'
+                //         }
+                //     },
+                //     { field: 'address',width: 400, id:'address',
+                //         prentField:0,title: 'Address', showOverflow: true,filter:true,filterType:"select",sortable:true, params:{
+                //             filterWay:'select',
+                //             filterWayValue:'equal',
+                //             filterWayPhold:'请选择地区',
+                //             list:"addrArr"
+                //         } },
+                //     { field: 'role',id:"role",prentField:0,width: 400, title: 'role',sortable:true,visible:false},
+                //     { title: '操作',id:"operate",prentField:0, width: 200,disabled: true,slots: { default: 'operate' },fixed:"right" }
+                // ];
                 // 多表头
                 column = [
-                    { type: 'seq', width: 50, title:'序号',disabled: true,fixed:"left" },
+                    { type: 'seq', width: 50, title:'序号',fixed:"left" },
+                    { type: 'checkbox',  width: 50,fixed:"left" },
                     {
                         field: 'name',
                         width: 400,
@@ -187,7 +231,17 @@
             },
             updateColumn(columns){
                 console.log(columns);
-                debugger
+            },
+            selectAllEvent ({checked, records,selection}) {
+                console.log(checked ? '所有勾选事件' : '所有取消事件', records)
+            },
+            selectChangeEvent ({ checked, records }) {
+                console.log(checked ? '勾选事件' : '取消事件', records)
+            },
+            getSelectEvent () {
+                let selectRecords = this.$refs.demoTable.$refs.filterTable.getCheckboxRecords()
+                console.log(selectRecords)
+                this.$XModal.alert(selectRecords.length)
             }
         }
     }

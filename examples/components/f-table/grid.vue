@@ -18,6 +18,7 @@
             :keepSource="keepSource"
             :pagerConfig="pagerConfig"
             :toolbarConfig="toolbarConfig"
+            :checkbox-config="{trigger: 'row', highlight: true, range: true}"
             :loading="gridLoading"
             :columns="columns"
             :data="data"
@@ -28,6 +29,8 @@
                 <vxe-button @click="align = 'left'">居左</vxe-button>
                 <vxe-button @click="align = 'center'">居中</vxe-button>
                 <vxe-button @click="align = 'right'">居右</vxe-button>
+                <slot name="toolbar">
+                </slot>
             </template>
             <template v-slot:display_columns>
                 <div class="iconBoxs">
@@ -216,7 +219,7 @@
             <!--默认项-->
             <template v-slot:no_filter="{ column }">
                 <div class="slotBox onlyTitle">
-                    <p class="titleBox" v-contextmenu:contextmenu @click.stop="sortChange(column)">{{column.title}}
+                    <p class="titleBox" v-contextmenu:contextmenu @click.stop="sortChange(column)">1{{column.title}}
                         <span v-if="column.sortable" class="custom-sort custom-sort-nofilter" :class="{'is-order': column.order}">
                             <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
                             <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
@@ -528,34 +531,37 @@
                             item.slots?item.slots:item.slots={};
                             item.slots.default = "custom"
                         }
-
-                        // 筛选情况
-                        if(item.filter){
-                            // 如果写了filter为true,但没给我传filterType,默认filter为false。
-                            item.slots?item.slots:item.slots={};
-                            switch (item.filterType){
-                                case "input":
-                                    item.slots.header = "input_default";
-                                    break;
-                                case "select":
-                                    item.slots.header = "select_default";
-                                    break;
-                                case "date":
-                                    item.slots.header = "date_default";
-                                    break;
-                                default:
-                                    item.filter = false;
-                                    item.slots.header = "no_filter";
-                                    break;
+                        // 如果列有field
+                        if(item.field){
+                            // 筛选情况
+                            if(item.filter){
+                                // 如果写了filter为true,但没给我传filterType,默认filter为false。
+                                item.slots?item.slots:item.slots={};
+                                switch (item.filterType){
+                                    case "input":
+                                        item.slots.header = "input_default";
+                                        break;
+                                    case "select":
+                                        item.slots.header = "select_default";
+                                        break;
+                                    case "date":
+                                        item.slots.header = "date_default";
+                                        break;
+                                    default:
+                                        item.filter = false;
+                                        item.slots.header = "no_filter";
+                                        break;
+                                }
+                                // if(item.filter){
+                                //     filterElements[item.field]="";
+                                // }
+                            }else{
+                                // 如果没有筛选
+                                item.slots?item.slots:item.slots={};
+                                item.slots.header = "no_filter";
                             }
-                            // if(item.filter){
-                            //     filterElements[item.field]="";
-                            // }
-                        }else{
-                            // 如果没有筛选
-                            item.slots?item.slots:item.slots={};
-                            item.slots.header = "no_filter";
                         }
+
                         // 编辑情况
                         if(item.editRender){
                             if(item.editRender.options){
@@ -794,6 +800,7 @@
             },
             // 排序操作会触发
             sortChange (column) {
+                debugger
                     if (column.order === 'desc') {
                         this.$refs.filterTable.clearSort()
                     } else if (column.order === 'asc') {
