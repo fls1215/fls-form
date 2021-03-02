@@ -19,7 +19,9 @@
             :pagerConfig="pagerConfig"
             :toolbarConfig="toolbarConfig"
             :checkbox-config="{trigger: 'row', highlight: true, range: true}"
+            :sort-config="{multiple: true,remote:true}"
             :loading="gridLoading"
+            :showOverflow="true"
             :columns="columns"
             :data="data"
             @page-change="handlePageChange"
@@ -39,6 +41,9 @@
                     </div>
                     <div class="iconBox">
                         <i class="el-icon-printer" @click="printEvent"></i>
+                    </div>
+                    <div class="iconBox">
+                        <i class="el-icon-s-grid" @click="exportXlsx"></i>
                     </div>
                 </div>
             </template>
@@ -287,6 +292,8 @@
 <script>
     import treeTransfer from 'el-tree-transfer' // 引入
     import {mapState} from "vuex"
+    // 引入xlsx
+    import XLSX from 'xlsx';
     let that;
     export default {
         components:{ treeTransfer }, // 注册
@@ -300,21 +307,10 @@
                 ref:"filterTable",
                 sortConfig:{showIcon: false},
                 filterConfig:{showIcon: false,remote: true},
-                pagerConfig: {
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 10,
-                    pageSizes: [10, 20, 50, 100, 200, 500]
-                },
                 // 列头数据
                 columns:[],
                 //表格数据
                 data:[],
-                gridPage:{
-                    currentPage: 1,
-                    pageSize: 10,
-                    totalResult: 0
-                },
                 filterElements:{},//筛选值
                 filtersData:{},//筛选的方式
                 lessElements:[],//分段的筛选，最小值
@@ -400,6 +396,11 @@
                 removeObj:null,//新隐藏的列头数据
                 // 弹框
                 transferDialogVisible:false,
+                exporting:false,//正在导出
+                gridPage:{
+                    currentPage: 1,
+                    pageSize: 100,
+                }
             }
         },
         props:{
@@ -442,10 +443,10 @@
                 type: Object,
                 default:() => {
                     return {
-                        slots: {
-                            buttons: 'toolbar_buttons',
-                            tools:"display_columns"
-                        }
+                        // slots: {
+                        //     buttons: 'toolbar_buttons',//左边按钮
+                        //     tools:"display_columns"//右边导出、打印、动态表头功能
+                        // }
                     }
                 }
             },
@@ -461,6 +462,33 @@
                     return []
                 }
             },
+            pagerConfig: {
+                type: Object,
+                default:() => {
+                    return {
+                        enabled:true,//是否显示分页
+                        total: 0,
+                        currentPage: 1,
+                        pageSize: 200,
+                        pageSizes: [10, 20, 50, 100, 200, 500]
+                    }
+                }
+            },
+            // 动态表头
+            meterConfig:{
+                type: Boolean,
+                default:false
+            },
+            // 打印按钮
+            printConfig:{
+                type: Boolean,
+                default:false
+            },
+            // 导出按钮
+            exportConfig:{
+                type: Boolean,
+                default:false
+            },
         },
         computed:{
             ...mapState({
@@ -472,7 +500,7 @@
                 handler(newVal, oldVal) {
                     this.columns = JSON.parse(JSON.stringify(this.tableColumns));
                     this.getColumn();
-                    console.log("tableColumns",this.tableColumns)
+                    // console.log("tableColumns",this.tableColumns)
                 },
                 deep: true
             },
@@ -480,7 +508,7 @@
                 handler(newVal, oldVal) {
                     this.data = this.tableDatas;
                     this.gridLoading = false;
-                    console.log("tableDatas",this.tableDatas)
+                    // console.log("tableDatas",this.tableDatas)
                 },
                 deep: true
             },
@@ -495,6 +523,9 @@
                 let data = that.dicts[list].find(item =>{
                     return item.value == value
                 })
+                if(!data){
+                    console.log(value,list)
+                }
                 return data.label
             }
         },
@@ -537,8 +568,11 @@
                             if(item.filter){
                                 // 如果写了filter为true,但没给我传filterType,默认filter为false。
                                 item.slots?item.slots:item.slots={};
-                                switch (item.filterType){
-                                    case "input":
+                                switch (item.params.filterWay){
+                                    case "str":
+                                        item.slots.header = "input_default";
+                                        break;
+                                    case "num":
                                         item.slots.header = "input_default";
                                         break;
                                     case "select":
@@ -646,7 +680,9 @@
                 this.filtersData = {};
                 xTable.clearFilter();
                 this.gridLoading = true;
-                this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:this.gridPage})
+                this.pagerConfig.currentPage = 0;
+                this.pagerConfig.pageSize = pageSize;
+                this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:this.pagerConfig})
                 // xTable.updateData()
             },
             // 左固定
@@ -689,7 +725,9 @@
                 }
                 this.filtersData = filtersData;
                 this.gridLoading = true;
-                this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:this.gridPage})
+                this.pagerConfig.currentPage = 0;
+                this.pagerConfig.pageSize = pageSize;
+                this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:this.pagerConfig})
                 // xTable.updateData();
             },
             // 输入框回车触发
@@ -800,7 +838,7 @@
             },
             // 排序操作会触发
             sortChange (column) {
-                debugger
+                if(column.sortable){
                     if (column.order === 'desc') {
                         this.$refs.filterTable.clearSort()
                     } else if (column.order === 'asc') {
@@ -808,13 +846,14 @@
                     } else {
                         this.$refs.filterTable.sort(column.property, 'asc')
                     }
+                }
             },
             // 分页操作会触发
             handlePageChange ({ currentPage, pageSize }) {
                 alert("静态数据模拟");
-                this.gridPage.currentPage = currentPage;
-                this.gridPage.pageSize = pageSize;
-                this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:this.gridPage})
+                this.pagerConfig.currentPage = currentPage;
+                this.pagerConfig.pageSize = pageSize;
+                this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:this.pagerConfig})
                 // let data = [
                 //     { id: 10011, name: 'Test11', nickname: 'T11', role: 'Develop', sex: '00900', age: '80',birthday:'2021-02-11', address: 'Shenzhen' },
                 //     { id: 10012, name: 'Test12', nickname: 'T12', role: 'Designer', sex: '00901', age: '90',birthday:'2021-02-10', address: 'Shenzhen' },
@@ -926,8 +965,89 @@
             // 打印
             printEvent(){
                 this.$refs.filterTable.print()
-            }
-        }
+            },
+            // 导出
+            exportXlsx(){
+                 this.exporting = true;
+                 //创建book
+                 let wb = XLSX.utils.book_new();
+                 let ws;
+                 //表头
+                 let columns={};
+                 let fields = [];
+                 let exportColumns = [];
+                 let exportLists = {};
+                 this.tableColumns.forEach(item =>{
+                     if(item.field){
+                         columns[item.field] = item.title;
+                         fields.push(item.field)
+                     }
+                     // 如果有需要翻译的列，传入列名字及对应的的list,循环data时处理数据
+                     if(item.params&&item.params.list){
+                         exportColumns.push(item.field);
+                         exportLists[item.field]=item.params.list;
+                     }
+                 })
+
+                 // 从第一页开始请求数据，循环页数
+                let pageTotal = Math.ceil(this.pagerConfig.total/this.pagerConfig.pageSize);
+                 let gridPage = {};
+                gridPage.total = this.pagerConfig.total;
+                // gridPage.pageSize = this.pagerConfig.pageSize;
+                // 为了减少请求次数，此处默认为100
+                gridPage.pageSize = 100;
+                 for(let i = 1;i < pageTotal+1;i++){
+                     gridPage.currentPage = i;
+                     this.$emit("tableRefresh",{filtersData:this.filtersData,gridPage:gridPage}, (data)=> {
+                         // 去掉不想导出的列
+                         data.map(item =>{
+                             delete item.id;
+                             delete item._XID;
+                             // 遍历item的key,如果存在于exportColumns，则按字典翻译值
+                             for(let key in item){
+                                 if(exportColumns.includes(key) ){
+                                     let list = exportLists[key];
+                                     this.dicts[list].some(item2 =>{
+                                         if(item2.value == item[key]){
+                                             item[key] = item2.label
+                                             return true;
+                                         }
+                                     })
+
+                                 }
+                             }
+                         })
+
+                         //json转sheet
+                         // 首次插入
+                         if(i == 1){
+                             const newData = [columns, ...data];
+                             ws = XLSX.utils.json_to_sheet(newData, {header:fields, skipHeader:true});
+                         }else{
+                             // 循环插入
+                             XLSX.utils.sheet_add_json(ws, data, {header: fields, skipHeader: true, origin: -1});
+                         }
+                         if(i == pageTotal){
+                             //设置列宽
+                             ws['!cols'] = [];
+                             for(let key in columns){
+                                 ws['!cols'].push({width: 15})
+                             }
+
+                             var timestamp = (new Date()).getDate();
+                             //sheet写入book
+                             XLSX.utils.book_append_sheet(wb, ws, "file");
+                             //输出
+                             XLSX.writeFile(wb,"导出"+timestamp+".xlsx");
+                             this.exporting = false;
+                         }
+                     })
+                 }
+
+
+             }
+        },
+
     }
 
 </script>

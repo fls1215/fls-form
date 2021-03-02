@@ -8,12 +8,11 @@ import router from "./router"
 import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(Element)
-//引入vxe-table
 
+//引入vxe-table
 import 'xe-utils'
 import VXETable from 'vxe-table'
 import 'vxe-table/lib/style.css'
-
 Vue.use(VXETable)
 // 给 vue 实例挂载内部对象，例如：
 Vue.prototype.$XModal = VXETable.modal
@@ -27,6 +26,7 @@ Vue.prototype.$XPrint = VXETable.print
 import contentmenu from 'v-contextmenu'
 import 'v-contextmenu/dist/index.css'
 Vue.use(contentmenu)
+
 
 
 Vue.config.productionTip = false
