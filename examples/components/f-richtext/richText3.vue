@@ -85,7 +85,6 @@
                 field.setAttribute("node", str);
                 field.innerHTML = this.selectDataList[str];
 
-debugger
 
 
 
@@ -126,9 +125,9 @@ debugger
                             let obj = document.getElementById("messageDesc")
                             obj.focus() // 解决ff不获取焦点无法定位问题
 
-                            let innerDivText = obj.childNodes[this.insertChildIndex + 2] // 1 是移动到插入节点的最后  2是移动到插入节点的下一个节点后面，相当于在插入节点后面的空格插入光标
+                            let innerDivText = obj.childNodes[this.insertChildIndex + 1]
                             if (innerDivText.length > 0) {
-                                lastSelection.collapse(innerDivText, 2)
+                                lastSelection.collapse(innerDivText, 1)
                             } else {
                                 lastSelection.collapse(innerDivText, 0)
                             }
@@ -288,22 +287,22 @@ debugger
                     result = str
                     return result
                 }
-                let subStr = ""
-                while (str.indexOf("[") >= 0) {
-                    let startIndex = str.indexOf("[")
-                    let endIndex = str.indexOf("]")
-                    if (str.indexOf("[") === 0) {
-                        let code = str.substring(startIndex + 1, endIndex)
-                        result += "&nbsp;<span class=\"keyWord\" node=\"" + code + "\">" + this.selectDataList[code] + "</span>&nbsp;"
-                        str = str.substring(endIndex + 1)
-                    } else {
-                        subStr = str.substring(0, startIndex)
-                        result += subStr
-                        str = str.substring(startIndex)
-                    }
-                }
+                // let subStr = ""
+                // while (str.indexOf("[") >= 0) {
+                //     let startIndex = str.indexOf("[")
+                //     let endIndex = str.indexOf("]")
+                //     if (str.indexOf("[") === 0) {
+                //         let code = str.substring(startIndex + 1, endIndex)
+                //         result += "&nbsp;<span class=\"keyWord\" node=\"" + code + "\">" + this.selectDataList[code] + "</span>&nbsp;"
+                //         str = str.substring(endIndex + 1)
+                //     } else {
+                //         subStr = str.substring(0, startIndex)
+                //         result += subStr
+                //         str = str.substring(startIndex)
+                //     }
+                // }
                 console.log("result + str",result + str)
-                return result + str
+                return str
             },
             // 下拉框的键盘事件
             documentKeyMethod (e) {
@@ -378,6 +377,7 @@ debugger
             },
             insertAfter(newelement,targetelement) {
                 var parentelement = targetelement.parentNode;
+
                 if (parentelement.lastChild == targetelement) {
                     parentelement.appendChild(newelement);
                 }

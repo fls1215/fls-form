@@ -51,7 +51,7 @@
             <!--输入筛选-->
             <template v-slot:input_default="{ column }">
                 <div class="slotBox">
-                    <p class="titleBox" v-contextmenu:contextmenu @click.stop="sortChange(column)">{{column.title}}
+                    <p class="titleBox" :style="{justifyContent:column.align?(column.align =='center'?'center':(column.align =='right'?'flex-end':'left')):align =='center'?'center':(align =='right'?'flex-end':'left')}" v-contextmenu:contextmenu @click.stop="sortChange(column)">{{column.title}}
                         <span v-if="column.sortable" class="custom-sort" :class="{'is-order': column.order}">
                             <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
                             <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
@@ -105,7 +105,7 @@
             <!--下拉筛选-->
             <template v-slot:select_default="{ column }">
                 <div class="slotBox">
-                    <p class="titleBox" v-contextmenu:contextmenu @click.stop="sortChange(column)">{{column.title}}
+                    <p class="titleBox" :style="{justifyContent:column.align?(column.align =='center'?'center':(column.align =='right'?'flex-end':'left')):align =='center'?'center':(align =='right'?'flex-end':'left')}" v-contextmenu:contextmenu @click.stop="sortChange(column)">{{column.title}}
                         <span v-if="column.sortable" class="custom-sort" :class="{'is-order': column.order}">
                             <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
                             <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
@@ -160,7 +160,7 @@
             <!--日期筛选-->
             <template v-slot:date_default="{ column }">
                 <div class="slotBox">
-                    <p class="titleBox" v-contextmenu:contextmenu @click.stop="sortChange(column)">{{column.title}}
+                    <p class="titleBox" :style="{justifyContent:column.align?(column.align =='center'?'center':(column.align =='right'?'flex-end':'left')):align =='center'?'center':(align =='right'?'flex-end':'left')}" v-contextmenu:contextmenu @click.stop="sortChange(column)">{{column.title}}
                         <span v-if="column.sortable" class="custom-sort" :class="{'is-order': column.order}">
                             <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
                             <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>
@@ -224,7 +224,7 @@
             <!--默认项-->
             <template v-slot:no_filter="{ column }">
                 <div class="slotBox onlyTitle">
-                    <p class="titleBox" v-contextmenu:contextmenu @click.stop="sortChange(column)">1{{column.title}}
+                    <p class="titleBox" :style="{justifyContent:column.align?(column.align =='center'?'center':(column.align =='right'?'flex-end':'left')):align =='center'?'center':(align =='right'?'flex-end':'left')}" v-contextmenu:contextmenu @click.stop="sortChange(column)">1{{column.title}}
                         <span v-if="column.sortable" class="custom-sort custom-sort-nofilter" :class="{'is-order': column.order}">
                             <i class="vxe-sort--asc-btn vxe-icon--caret-top" :class="[column.order === 'asc' ? 'sort--active' : '']"></i>
                             <i class="vxe-sort--desc-btn vxe-icon--caret-bottom" :class="[column.order === 'desc'? 'sort--active' : '']"></i>

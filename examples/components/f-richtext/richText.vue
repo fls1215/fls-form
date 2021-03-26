@@ -101,6 +101,7 @@ let lastEditRange ;
                 // 去掉下拉框
                 this.screenX = 0;
                 this.screenY = 0;
+                debugger
             },
             // 获取坐标
             getSelectionCoordinate(){

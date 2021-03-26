@@ -11,7 +11,7 @@
         name: "richText3F",
         data(){
             return {
-                messageDescStr: "sss" + "[FORM_NAME]", // 来个默认值
+                messageDescStr: "", // 来个默认值
                 selectDataList: { // 下拉框的值
                     "FORM_NAME": "表单名称",
                     "STAFF_SCOPE": "表单范围",
